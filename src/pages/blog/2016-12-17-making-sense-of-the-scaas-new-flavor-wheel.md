@@ -9,7 +9,7 @@ tags:
   - flavor
   - tasting
 ---
-```
+```language-js
 console.log("hello");
 ```
 
