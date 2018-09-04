@@ -1,6 +1,9 @@
 @import "~bulma/sass/utilities/initial-variables"
+@import url('https://fonts.googleapis.com/css?family=Quicksand:400,700|Roboto+Condensed:400,700')
 
 // Config vars
+$roboto: 'Roboto Condensed', sans-serif
+$quicksand: 'Quicksand', sans-serif
 $kaldi-red: #FD461E
 $kaldi-red-invert: #fff
 
@@ -40,3 +43,16 @@ $primary-invert: $kaldi-red-invert
   margin-top: 0 !important
 
 @import "~bulma"
+.sticky-nav
+  background-color: white
+  z-index: 100 
+  box-shadow: 0 2px 15px rgba(#000000, 0.07)
+
+.logo 
+  font-family: $roboto
+  font-weight: bold
+  font-size: 21px
+
+.navbar-start .navbar-item
+  font-family: $quicksand
+  font-weight: bold
