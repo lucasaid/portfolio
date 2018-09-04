@@ -33,6 +33,16 @@ module.exports = {
         modulePath: `${__dirname}/src/cms/cms.js`,
       },
     },
+    {
+      resolve: `gatsby-transformer-remark`,
+      options: {
+        plugins: [
+          {
+            resolve: `gatsby-remark-prismjs`,
+          },
+        ],
+      },
+    },
     'gatsby-plugin-netlify', // make sure to keep it last in the array
   ],
 }
