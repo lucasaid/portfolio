@@ -9,6 +9,9 @@ tags:
   - flavor
   - tasting
 ---
+```
+console.log("hello");
+```
 
 ![flavor wheel](/img/flavor_wheel.jpg)
 
