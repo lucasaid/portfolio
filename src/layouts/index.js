@@ -4,7 +4,7 @@ import Helmet from 'react-helmet'
 import Sticky from 'react-sticky-el';
 
 import Navbar from '../components/Navbar'
-import './all.sass'
+import '../stylesheets/all.scss'
 import 'prismjs/themes/prism-tomorrow.css'
 
 const TemplateWrapper = ({ children }) => (

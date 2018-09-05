@@ -5,6 +5,7 @@
   "author": "Austin Green",
   "dependencies": {
     "bulma": "^0.7.0",
+    "font-awesome": "^4.7.0",
     "gatsby": "^1.9.213",
     "gatsby-link": "^1.6.37",
     "gatsby-plugin-netlify": "^1.0.19",
@@ -23,6 +24,7 @@
     "prismjs": "^1.15.0",
     "prop-types": "^15.6.0",
     "react": "^16.2.0",
+    "react-fontawesome": "^1.6.1",
     "react-helmet": "^5.2.0",
     "react-sticky-el": "^1.0.20",
     "uuid": "^3.2.1"
@@ -38,9 +40,12 @@
     "develop": "gatsby develop",
     "serve": "gatsby serve",
     "format": "prettier --trailing-comma es5 --no-semi --single-quote --write \"{gatsby-*.js,src/**/*.js}\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "commit": "git-cz"
   },
   "devDependencies": {
+    "commitizen": "^2.10.1",
+    "cz-conventional-changelog": "^2.1.0",
     "prettier": "^1.7.4"
   }
 }
