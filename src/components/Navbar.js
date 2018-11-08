@@ -1,9 +1,9 @@
-import React from 'react'
-import Link from 'gatsby-link'
+import React from "react";
+import Link from "gatsby-link";
 
-import github from '../img/github-icon.svg'
-import FontAwesome from 'react-fontawesome'
-import 'font-awesome/css/font-awesome.min.css'
+import github from "../img/github-icon.svg";
+import FontAwesome from "react-fontawesome";
+import "font-awesome/css/font-awesome.min.css";
 
 const Navbar = () => (
   <nav className="navbar">
@@ -14,8 +14,11 @@ const Navbar = () => (
         </Link>
       </div>
       <div className="navbar-start">
-        <Link className="navbar-item" to="/work">
-          Work
+        <Link className="navbar-item" to="/web">
+          Web
+        </Link>
+        <Link className="navbar-item" to="/photography">
+          Photography
         </Link>
         <Link className="navbar-item" to="/blog">
           Blog
@@ -29,7 +32,7 @@ const Navbar = () => (
           rel="noopener noreferrer"
         >
           <span className="icon">
-            <FontAwesome name='github' />
+            <FontAwesome name="github" />
           </span>
         </a>
         <a
@@ -39,7 +42,7 @@ const Navbar = () => (
           rel="noopener noreferrer"
         >
           <span className="icon">
-            <FontAwesome name='codepen' />
+            <FontAwesome name="codepen" />
           </span>
         </a>
         <a
@@ -49,7 +52,7 @@ const Navbar = () => (
           rel="noopener noreferrer"
         >
           <span className="icon">
-            <FontAwesome name='linkedin' />
+            <FontAwesome name="linkedin" />
           </span>
         </a>
         <a
@@ -59,7 +62,7 @@ const Navbar = () => (
           rel="noopener noreferrer"
         >
           <span className="icon">
-            <FontAwesome name='twitter' />
+            <FontAwesome name="twitter" />
           </span>
         </a>
         <a
@@ -69,12 +72,12 @@ const Navbar = () => (
           rel="noopener noreferrer"
         >
           <span className="icon">
-            <FontAwesome name='instagram' />
+            <FontAwesome name="instagram" />
           </span>
         </a>
       </div>
     </div>
   </nav>
-)
+);
 
-export default Navbar
+export default Navbar;
