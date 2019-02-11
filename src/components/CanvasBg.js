@@ -16,14 +16,14 @@ class CanvasBg extends React.Component {
 
       var canvaswidth = window.innerWidth;
       var canvasheight = window.innerHeight;
-      var step = 80;
+      var step = 60;
       var dpr = window.devicePixelRatio;
       canvas.width = canvaswidth * dpr;
       canvas.height = canvasheight * dpr;
       context.scale(dpr, dpr);
 
       context.lineCap = "square";
-      context.lineWidth = 4;
+      context.lineWidth = 3;
       context.globalCompositeOperation = "destination-atop";
       context.strokeStyle = "rgba(0,0,0,0.05)";
 
@@ -37,8 +37,6 @@ class CanvasBg extends React.Component {
           context.moveTo(x + width, y);
           context.lineTo(x, y + height);
         }
-
-        context.stroke();
       }
 
       for (var x = 0; x < canvaswidth; x += step) {
@@ -46,6 +44,7 @@ class CanvasBg extends React.Component {
           draw(x, y, step, step);
         }
       }
+      context.stroke();
     }
   }
   render() {
