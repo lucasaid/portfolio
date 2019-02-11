@@ -9,7 +9,11 @@ export default class IndexPage extends React.Component {
         <header>
           <h1>CHRISCREAT.ES</h1>
           <div className="profile">
-            <img src={profileImage} className="profile__image" />
+            <img
+              src={profileImage}
+              className="profile__image"
+              alt="Chris Lucas"
+            />
           </div>
         </header>
         <section className="description">
