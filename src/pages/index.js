@@ -33,6 +33,7 @@ export default class IndexPage extends React.Component {
             target="_blank"
             rel="noopener noreferrer"
           >
+            <span className="link_text">github</span>
             <span className="icon">
               <FontAwesome name="github" />
             </span>
@@ -43,6 +44,7 @@ export default class IndexPage extends React.Component {
             target="_blank"
             rel="noopener noreferrer"
           >
+            <span className="link_text">codepen</span>
             <span className="icon">
               <FontAwesome name="codepen" />
             </span>
@@ -53,6 +55,7 @@ export default class IndexPage extends React.Component {
             target="_blank"
             rel="noopener noreferrer"
           >
+            <span className="link_text">linkedin</span>
             <span className="icon">
               <FontAwesome name="linkedin" />
             </span>
@@ -63,6 +66,7 @@ export default class IndexPage extends React.Component {
             target="_blank"
             rel="noopener noreferrer"
           >
+            <span className="link_text">twitter</span>
             <span className="icon">
               <FontAwesome name="twitter" />
             </span>
@@ -73,6 +77,7 @@ export default class IndexPage extends React.Component {
             target="_blank"
             rel="noopener noreferrer"
           >
+            <span className="link_text">instagram</span>
             <span className="icon">
               <FontAwesome name="instagram" />
             </span>
