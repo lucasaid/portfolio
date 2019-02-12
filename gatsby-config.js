@@ -43,17 +43,18 @@ module.exports = {
         ]
       }
     },
-    // {
-    //   resolve: `gatsby-plugin-manifest`,
-    //   options: {
-    //     name: "Chris Creates",
-    //     short_name: "chriscreat.es",
-    //     start_url: "/",
-    //     background_color: "#FFFFFF",
-    //     theme_color: "#FFFFFF",
-    //     display: "standalone"
-    //   }
-    // },
+    {
+      resolve: `gatsby-plugin-manifest`,
+      options: {
+        name: "Chris Creates",
+        short_name: "chriscreat.es",
+        start_url: "/",
+        background_color: "#FFFFFF",
+        theme_color: "#FFFFFF",
+        display: "standalone"
+      }
+    },
+    `gatsby-plugin-typescript`,
     // "gatsby-plugin-offline",
     "gatsby-plugin-netlify" // make sure to keep it last in the array
   ]

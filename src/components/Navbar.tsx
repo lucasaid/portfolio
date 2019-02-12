@@ -1,9 +1,7 @@
-import React from "react";
-import Link from "gatsby-link";
-
-import github from "../img/github-icon.svg";
-import FontAwesome from "react-fontawesome";
 import "font-awesome/css/font-awesome.min.css";
+import { Link } from "gatsby";
+import React from "react";
+import FontAwesome from "react-fontawesome";
 
 const Navbar = () => (
   <nav className="navbar">

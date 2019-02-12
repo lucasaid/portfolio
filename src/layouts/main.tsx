@@ -1,12 +1,11 @@
+import "prismjs/themes/prism-tomorrow.css";
 import React from "react";
-import PropTypes from "prop-types";
 import Helmet from "react-helmet";
 
 import CanvasBg from "../components/CanvasBg";
 import "../stylesheets/all.scss";
-import "prismjs/themes/prism-tomorrow.css";
 
-const TemplateWrapper = ({ children }) => {
+const MainLayout = ({ children }) => {
   return (
     <div>
       <Helmet>
@@ -19,14 +18,10 @@ const TemplateWrapper = ({ children }) => {
         <title>𝖈𝖍𝖗𝖎𝖘𝖈𝖗𝖊𝖆𝖙.𝖊𝖘</title>
         <link rel="canonical" href="https://chriscreat.es" />
       </Helmet>
-      <div>{children()}</div>
+      <div>{children}</div>
       <CanvasBg />
     </div>
   );
 };
 
-TemplateWrapper.propTypes = {
-  children: PropTypes.func
-};
-
-export default TemplateWrapper;
+export default MainLayout

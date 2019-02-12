@@ -1,9 +1,9 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import Content, { HTMLContent } from '../components/Content'
+import { graphql } from "gatsby";
+import React from "react";
+import Content, { HTMLContent } from "../components/Content";
 
 export const WorkPageTemplate = ({ title, content, contentComponent }) => {
-  const PageContent = contentComponent || Content
+  const PageContent = contentComponent || Content;
 
   return (
     <section className="section section--gradient">
@@ -20,17 +20,11 @@ export const WorkPageTemplate = ({ title, content, contentComponent }) => {
         </div>
       </div>
     </section>
-  )
-}
-
-WorkPageTemplate.propTypes = {
-  title: PropTypes.string.isRequired,
-  content: PropTypes.string,
-  contentComponent: PropTypes.func,
-}
+  );
+};
 
 const WorkPage = ({ data }) => {
-  const { markdownRemark: post } = data
+  const { markdownRemark: post } = data;
 
   return (
     <WorkPageTemplate
@@ -38,14 +32,10 @@ const WorkPage = ({ data }) => {
       title={post.frontmatter.title}
       content={post.html}
     />
-  )
-}
+  );
+};
 
-WorkPage.propTypes = {
-  data: PropTypes.object.isRequired,
-}
-
-export default WorkPage
+export default WorkPage;
 
 export const workPageQuery = graphql`
   query WorkPage($id: String!) {
@@ -56,4 +46,4 @@ export const workPageQuery = graphql`
       }
     }
   }
-`
+`;
