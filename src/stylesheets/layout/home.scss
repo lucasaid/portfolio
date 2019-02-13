@@ -1,57 +1,56 @@
-
 @import "~bulma";
 
 header {
+  align-items: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
   margin: 5vh auto 10vh;
 }
 
 h1 {
   font-family: $roboto;
-  font-weight: bold;
   font-size: 38px;
+  font-weight: bold;
   letter-spacing: 2px;
 }
 .profile {
-  width: 20vh;
-  height: 20vh;
   border-radius: 50%;
+  height: 20vh;
+  margin-top: 5vh;
   overflow: hidden;
   position: relative;
-  margin-top: 5vh;
+  width: 20vh;
 }
 .profile__image {
-  width:100%;
+  left: 50%;
   position: absolute;
   top: 50%;
-  left: 50%;
   transform: translate(-50%, -50%);
+  width: 100%;
 }
 
 .canvas-bg {
+  left: 0;
   position: fixed;
   top: 0;
-  left: 0;
   z-index: -1;
 }
 .description {
-  text-align: center;
   margin: 10vh auto;
+  text-align: center;
 }
 .links {
+  align-items: center;
   display: flex;
   justify-content: space-around;
-  align-items: center;
-  width: 100%;
-  max-width: 550px;
   margin: 10vh auto;
+  max-width: 550px;
+  width: 100%;
 }
 .link_text {
-  text-indent: -10000px;
   display: inline-block;
+  text-indent: -10000px;
 }
 .icon {
   font-size: 28px;
