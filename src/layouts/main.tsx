@@ -17,6 +17,25 @@ const MainLayout = ({ children }) => {
         />
         <title>𝖈𝖍𝖗𝖎𝖘𝖈𝖗𝖊𝖆𝖙.𝖊𝖘</title>
         <link rel="canonical" href="https://chriscreat.es" />
+        <link
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <meta name="msapplication-TileColor" content="#65c9ff" />
+        <meta name="theme-color" content="#ffffff" />
       </Helmet>
       <div>{children}</div>
       <CanvasBg />
@@ -24,4 +43,4 @@ const MainLayout = ({ children }) => {
   );
 };
 
-export default MainLayout
+export default MainLayout;
