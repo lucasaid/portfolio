@@ -1,4 +1,7 @@
 # TODO
 
 - Retina image
-- Move font awesome from package to local
+- Set up work section
+- Set up blog section
+- Add real name info
+- Copyright info
