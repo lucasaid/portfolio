@@ -1,7 +1,7 @@
-import "font-awesome/css/font-awesome.min.css";
 import React from "react";
 import FontAwesome from "react-fontawesome";
 import profileImage from "../img/profile.jpg";
+import "../vendor/font-awesome/css/font-awesome.css";
 
 import MainLayout from "../layouts/main";
 export default class IndexPage extends React.Component {
