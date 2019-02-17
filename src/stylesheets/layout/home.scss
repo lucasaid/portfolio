@@ -5,19 +5,31 @@ header {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin: 5vh auto 10vh;
+  margin: 5vh auto 5vh;
 }
 
+h2 {
+  font-family: $roboto;
+  font-size: 11vw;
+  font-weight: bold;
+  letter-spacing: 0.1vw;
+  @include respond-to(fablet) {
+    font-size: 2.618rem;
+    letter-spacing: 2px;
+  }
+}
 h1 {
   font-family: $roboto;
-  font-size: 38px;
+  font-size: 7vw;
   font-weight: bold;
-  letter-spacing: 2px;
+  @include respond-to(fablet) {
+    font-size: 1.618rem;
+  }
 }
 .profile {
   border-radius: 50%;
   height: 20vh;
-  margin-top: 5vh;
+  margin-top: 4vh;
   overflow: hidden;
   position: relative;
   width: 20vh;
@@ -37,14 +49,14 @@ h1 {
   z-index: -1;
 }
 .description {
-  margin: 10vh auto;
+  margin: 5vh auto;
   text-align: center;
 }
 .links {
   align-items: center;
   display: flex;
   justify-content: space-around;
-  margin: 10vh auto;
+  margin: 5vh auto;
   max-width: 550px;
   width: 100%;
 }

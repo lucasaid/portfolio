@@ -10,7 +10,7 @@ export default class IndexPage extends React.Component {
       <MainLayout>
         <div className="container">
           <header>
-            <h1>CHRISCREAT.ES</h1>
+            <h2>CHRISCREAT.ES</h2>
             <div className="profile">
               <img
                 src={profileImage}
@@ -20,14 +20,20 @@ export default class IndexPage extends React.Component {
             </div>
           </header>
           <section className="description">
-            Front End Web Developer @ Hardhat
+            <h1>
+              CHRIS LUCAS
+              <br />
+              Front End Web Developer
+            </h1>
+            <br />
+            Currently @ Hardhat
             <br />
             Hobby Photographer
             <br />
             Gamer
             <br />
             <br />
-            Melbourne, Australia
+            <em>Melbourne, Australia</em>
           </section>
           <section className="links">
             <a

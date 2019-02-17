@@ -1,0 +1,58 @@
+@function em($px, $base: 16) {
+  @return ($px / $base) * 1em;
+}
+
+@function Rem($size) {
+  $remSize: $size / 16px;
+  @return $remSize * 1rem;
+}
+
+// Media Queries
+
+@mixin respond-to($media) {
+  @if $media == port-mob {
+    @media only screen and (min-width: em( 320 )) {
+      @content;
+    }
+  }
+
+  @if $media == land-mob {
+    @media only screen and (min-width: em( 480 )) {
+      @content;
+    }
+  }
+
+  @if $media == fablet {
+    @media only screen and (min-width: em( 572 )) {
+      @content;
+    }
+  }
+
+  @if $media == tablet {
+    @media only screen and (min-width: em( 768 )) {
+      @content;
+    }
+  } @else if $media == netbook {
+    @media only screen and (min-width: em( 1025 )) {
+      @content;
+    }
+  } @else if $media == desktop {
+    @media only screen and (min-width: em( 1200 )) {
+      @content;
+    }
+  }
+
+  //If a tablet or smaller
+  @if $media == tablet-or-smaller {
+    @media only screen and (max-width: em( 1024 )) {
+      @content;
+    }
+  }
+
+  //If a mobile or smaller
+  @if $media == mobile-or-smaller {
+    @media only screen and (max-width: em( 767 )) {
+      @content;
+    }
+  }
+}
