@@ -2,6 +2,7 @@ import { graphql, Link } from "gatsby";
 import { kebabCase } from "lodash";
 import React from "react";
 import Helmet from "react-helmet";
+import MainLayout from "../../layouts/main";
 
 const TagsPage = ({
   data: {
@@ -11,28 +12,30 @@ const TagsPage = ({
     }
   }
 }) => (
-  <section className="section">
-    <Helmet title={`Tags | ${title}`} />
-    <div className="container content">
-      <div className="columns">
-        <div
-          className="column is-10 is-offset-1"
-          style={{ marginBottom: "6rem" }}
-        >
-          <h1 className="title is-size-2 is-bold-light">Tags</h1>
-          <ul className="taglist">
-            {group.map(tag => (
-              <li key={tag.fieldValue}>
-                <Link to={`/tags/${kebabCase(tag.fieldValue)}/`}>
-                  {tag.fieldValue} ({tag.totalCount})
-                </Link>
-              </li>
-            ))}
-          </ul>
+  <MainLayout>
+    <section className="section">
+      <Helmet title={`Tags | ${title}`} />
+      <div className="container content">
+        <div className="columns">
+          <div
+            className="column is-10 is-offset-1"
+            style={{ marginBottom: "6rem" }}
+          >
+            <h1 className="title is-size-2 is-bold-light">Tags</h1>
+            <ul className="taglist">
+              {group.map(tag => (
+                <li key={tag.fieldValue}>
+                  <Link to={`/tags/${kebabCase(tag.fieldValue)}/`}>
+                    {tag.fieldValue} ({tag.totalCount})
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </MainLayout>
 );
 
 export default TagsPage;

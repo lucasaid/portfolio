@@ -1,6 +1,7 @@
 import { graphql, Link } from "gatsby";
 import React from "react";
 import Helmet from "react-helmet";
+import MainLayout from "../layouts/main";
 
 interface Props {
   data: any;
@@ -24,23 +25,25 @@ class TagRoute extends React.Component<Props> {
     } tagged with “${tag}”`;
 
     return (
-      <section className="section">
-        <Helmet title={`${tag} | ${title}`} />
-        <div className="container content">
-          <div className="columns">
-            <div
-              className="column is-10 is-offset-1"
-              style={{ marginBottom: "6rem" }}
-            >
-              <h3 className="title is-size-4 is-bold-light">{tagHeader}</h3>
-              <ul className="taglist">{postLinks}</ul>
-              <p>
-                <Link to="/tags/">Browse all tags</Link>
-              </p>
+      <MainLayout>
+        <section className="section">
+          <Helmet title={`${tag} | ${title}`} />
+          <div className="container content">
+            <div className="columns">
+              <div
+                className="column is-10 is-offset-1"
+                style={{ marginBottom: "6rem" }}
+              >
+                <h3 className="title is-size-4 is-bold-light">{tagHeader}</h3>
+                <ul className="taglist">{postLinks}</ul>
+                <p>
+                  <Link to="/tags/">Browse all tags</Link>
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </MainLayout>
     );
   }
 }
