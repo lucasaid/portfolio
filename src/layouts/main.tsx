@@ -15,7 +15,7 @@ const MainLayout = ({ children }) => {
           name="description"
           content="Chris Lucas - Frontend Web Developer. Melbourne, Australia"
         />
-        <title>𝖈𝖍𝖗𝖎𝖘𝖈𝖗𝖊𝖆𝖙.𝖊𝖘</title>
+        <title>Chris Lucas</title>
         <link rel="canonical" href="https://chriscreat.es" />
         <link
           rel="apple-touch-icon"
