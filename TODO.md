@@ -14,6 +14,7 @@
 - Retina image
 - Update photo
 - Copyright info
+- Page transitions - https://www.gatsbyjs.org/packages/gatsby-plugin-page-transitions/
 
 ## List of work
 
@@ -25,6 +26,7 @@
 - Save our slang
 - Deakin ATAR Calculator
 - AEMO
+- Vicroads
 
 ## Brands
 
@@ -41,9 +43,14 @@
 - Devondale
 - NAB
 - Mercades
+- Vicroads
 
 ## Personal Projects
 
 - File Curator
 - Tablify
 - Img bright
+
+## Plugins to add
+
+gatsby-remark-prismjs

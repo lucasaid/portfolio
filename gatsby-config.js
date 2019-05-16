@@ -8,13 +8,6 @@ module.exports = {
     {
       resolve: "gatsby-source-filesystem",
       options: {
-        path: `${__dirname}/src/pages`,
-        name: "pages"
-      }
-    },
-    {
-      resolve: "gatsby-source-filesystem",
-      options: {
         path: `${__dirname}/src/img`,
         name: "images"
       }
@@ -22,29 +15,7 @@ module.exports = {
     "gatsby-plugin-sharp",
     "gatsby-transformer-sharp",
     {
-      resolve: "gatsby-transformer-remark",
-      options: {
-        plugins: []
-      }
-    },
-    {
-      resolve: "gatsby-plugin-netlify-cms",
-      options: {
-        modulePath: `${__dirname}/src/cms/cms.js`
-      }
-    },
-    {
-      resolve: `gatsby-transformer-remark`,
-      options: {
-        plugins: [
-          {
-            resolve: `gatsby-remark-prismjs`
-          }
-        ]
-      }
-    },
-    {
-      resolve: `gatsby-plugin-manifest`,
+      resolve: "gatsby-plugin-manifest",
       options: {
         name: "Chris Creates",
         short_name: "chriscreates",
@@ -52,7 +23,7 @@ module.exports = {
         background_color: "#FFFFFF",
         theme_color: "#FFFFFF",
         display: "standalone",
-        icon: `static/android-chrome-512x512.png`,
+        icon: "static/android-chrome-512x512.png",
         icons: [
           {
             src: "static/android-chrome-192x192.png",
@@ -67,8 +38,8 @@ module.exports = {
         ]
       }
     },
-    `gatsby-plugin-typescript`,
+    "gatsby-plugin-typescript",
     "gatsby-plugin-offline",
-    "gatsby-plugin-netlify" // make sure to keep it last in the array
+    "gatsby-plugin-transition-link"
   ]
 };
