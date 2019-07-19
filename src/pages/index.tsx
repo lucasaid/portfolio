@@ -37,7 +37,7 @@ class IndexPage extends React.Component<Props> {
             <br />
             Currently @{" "}
             <a
-              href="http://vudoo.com.au"
+              href="http://vudoo.com"
               target="_blank"
               rel="noopener noreferrer"
             >
