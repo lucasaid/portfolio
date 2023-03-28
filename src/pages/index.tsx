@@ -35,14 +35,7 @@ class IndexPage extends React.Component<Props> {
           <section className="description">
             <h2>Front End Developer</h2>
             <br />
-            Currently @{" "}
-            <a
-              href="http://skedulo.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Skedulo
-            </a>
+            Currently Freelancing
             <br />
             Hobby Photographer
             <br />
