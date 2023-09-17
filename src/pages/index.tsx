@@ -35,7 +35,7 @@ class IndexPage extends React.Component<Props> {
           <section className="description">
             <h2>Front End Developer</h2>
             <br />
-            Currently Freelancing
+            Currently @ <a href="https://www.skedulo.com/" target="_blank">Skedulo</a>
             <br />
             Hobby Photographer
             <br />
