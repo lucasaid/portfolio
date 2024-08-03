@@ -1,55 +1,50 @@
-import React from "react";
+import React, { useRef, useEffect } from "react";
+const draw = (x, y, width, height, context) => {
+  if(context) {
+    const leftToRight = Math.random() >= 0.5;
 
-class CanvasBg extends React.Component {
-  canvasElement: any;
-  context: any;
-  constructor(props) {
-    super(props);
-    this.canvasElement = React.createRef();
+    if (leftToRight) {
+      context.moveTo(x, y);
+      context.lineTo(x + width, y + height);
+    } else {
+      context.moveTo(x + width, y);
+      context.lineTo(x, y + height);
+    }
   }
-  componentDidMount() {
-    this.genCanvas();
-  }
-  genCanvas() {
-    if (this.canvasElement.current) {
-      const canvas = this.canvasElement.current;
-      this.context = canvas.getContext("2d");
-
+}
+const genCanvas = (canvasElement) => {
+  if (canvasElement.current) {
+    const canvas = canvasElement.current as HTMLCanvasElement;
+    const context = canvas?.getContext("2d");
+    if(context) {
       const canvaswidth = window.innerWidth;
       const canvasheight = window.innerHeight;
       const step = 60;
       const dpr = window.devicePixelRatio;
       canvas.width = canvaswidth * dpr;
       canvas.height = canvasheight * dpr;
-      this.context.scale(dpr, dpr);
+      context.scale(dpr, dpr);
 
-      this.context.lineCap = "square";
-      this.context.lineWidth = 3;
-      this.context.globalCompositeOperation = "destination-atop";
-      this.context.strokeStyle = "rgba(0,0,0,0.05)";
+      context.lineCap = "square";
+      context.lineWidth = 3;
+      context.globalCompositeOperation = "destination-atop";
+      context.strokeStyle = "rgba(0,0,0,0.05)";
 
       for (let x = 0; x < canvaswidth; x += step) {
         for (let y = 0; y < canvasheight; y += step) {
-          this.draw(x, y, step, step);
+          draw(x, y, step, step, context);
         }
       }
-      this.context.stroke();
+      context.stroke();
     }
   }
-  draw(x, y, width, height) {
-    const leftToRight = Math.random() >= 0.5;
-
-    if (leftToRight) {
-      this.context.moveTo(x, y);
-      this.context.lineTo(x + width, y + height);
-    } else {
-      this.context.moveTo(x + width, y);
-      this.context.lineTo(x, y + height);
-    }
-  }
-  render() {
-    return <canvas className="canvas-bg" ref={this.canvasElement} />;
-  }
+}
+const CanvasBg = () => {
+  const canvasElement = useRef(null);
+  useEffect(() => {
+    genCanvas(canvasElement)
+  },[])
+  return <canvas className="canvas-bg" ref={canvasElement} />;
 }
 
 export default CanvasBg;

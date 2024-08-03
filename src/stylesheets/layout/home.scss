@@ -1,5 +1,11 @@
 @import "~bulma";
 
+html {
+  background-color: white;
+}
+body {
+  color: rgb(74, 74, 74);
+}
 header {
   align-items: center;
   display: flex;
