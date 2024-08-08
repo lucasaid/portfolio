@@ -1,10 +1,17 @@
 @import "~bulma";
 
 html {
-  background-color: white;
+  background-color: #1B2F33;
 }
 body {
-  color: rgb(74, 74, 74);
+  color: #C0C5C1;
+  font-family: $courier;
+  // background-image: url(bg.png);
+  // background-size:contain;
+  // background-repeat: no-repeat;
+  // background-position: center center;
+  font-size: 18px;
+  font-weight: bold;
 }
 header {
   align-items: center;
@@ -15,7 +22,7 @@ header {
 }
 
 h1 {
-  font-family: $roboto;
+  font-family: $courier;
   font-size: 11vw;
   font-weight: bold;
   letter-spacing: 0.1vw;
@@ -25,12 +32,15 @@ h1 {
   }
 }
 h2 {
-  font-family: $roboto;
+  font-family: $courier;
   font-size: 7vw;
   font-weight: bold;
   @include respond-to(fablet) {
     font-size: 1.618rem;
   }
+} 
+a {
+  color: #BBBE64;
 }
 .profile {
   border-radius: 50%;

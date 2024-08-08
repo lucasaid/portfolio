@@ -6,7 +6,7 @@ import "../stylesheets/all.scss";
 
 const MainLayout = (props) => {
   return (
-    <>
+    <div className="scanlines">
       <Helmet>
         <html lang="en" />
         <meta charSet="utf-8" />
@@ -40,7 +40,7 @@ const MainLayout = (props) => {
         <main>{props.children}</main>
       </div>
       <CanvasBg />
-      </>
+      </div>
   )
 }
 

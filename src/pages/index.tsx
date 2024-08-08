@@ -30,15 +30,16 @@ const IndexPage = (props) => {
           </div>
         </header>
         <section className="description">
-          <h2>Front End Developer</h2>
+          <h2>Senior Front End Developer</h2>
           <br />
           Currently @ <a href="https://www.skedulo.com/" target="_blank">Skedulo</a>
           <br />
-          Dad
           <br />
-          Hobby Photographer
+          Coder
           <br />
           Gamer
+          <br />
+          Dad
           <br />
           <br />
           <em>Melbourne, Australia</em>
