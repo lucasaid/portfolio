@@ -7,7 +7,7 @@ import Helmet from "../../layouts/Helmet";
 const MAX_HISTORY_LENGTH = 50
 // Allows extra buffer of lines before removing them from the array
 const OUTPUT_LINE_BUFFER = 20
-const FILE_COUNT_WIDTH = 2
+const FILE_COUNT_WIDTH = 4
 const COMMANDS = {
   clear: "Clears the terminal output",
   ls: "Lists files in the current directory",
@@ -16,18 +16,18 @@ const COMMANDS = {
 }
 const ROOT_LISTING = {
   "root": [
-    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
-    ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "public"],
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.tsx"],
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "package.json"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "package-lock.json"],
+    ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "public"],
     ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "work"],
-    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.tsx"]
   ],
   "work": [
-    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
     ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "public"],
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
   ]
 }
 
@@ -66,6 +66,11 @@ const Terminal = () => {
       outputDiv.current.scrollTop = outputDiv.current?.scrollHeight;
     }
   },[output])
+  useEffect(() => {
+    const gameSound = new Audio('/beep.mp3');
+    gameSound.loop = false;
+    gameSound.play();  
+  },[])
   
   useEffect(() => {
     if(historyPointer !== undefined && historyPointer !== null && commandDiv.current) {
@@ -111,6 +116,8 @@ const Terminal = () => {
         setDirectory(args[0] || "root");
       } else if(args[0] === "..") {
         setDirectory("root");
+      } else {
+        appendOutput("cd: no such file or directory: " + args[0]);
       }
     },
     help: () => {
