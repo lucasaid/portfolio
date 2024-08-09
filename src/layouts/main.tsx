@@ -6,7 +6,7 @@ import "../stylesheets/all.scss";
 
 const MainLayout = (props) => {
   return (
-    <div className="scanlines">
+    <div>
       <Helmet>
         <html lang="en" />
         <meta charSet="utf-8" />
