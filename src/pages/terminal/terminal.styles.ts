@@ -8,7 +8,7 @@ export const TerminalWrapper = styled.div`
   overflow: hidden;
 `
 export const Prompt = styled.div`
-  color: #888;
+  color: #fff;
   margin-right: 5px;
 `
 export const Command = styled.input`
@@ -21,10 +21,14 @@ export const Command = styled.input`
   width: 100%;
 `
 export const Output = styled.div`
-  color: #888;
+  color: rgba(100, 255, 100, 1);
   margin-top: 5px;
   flex: 1;
-  overflow-y: scroll;
+  overflow-y: hidden;
+  max-height: calc(100% - 27px);
+  div {
+    min-height: 27px;
+  }
 `
 export const CommandRow = styled.div`
   display: flex;
