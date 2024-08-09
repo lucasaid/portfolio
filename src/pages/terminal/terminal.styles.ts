@@ -40,3 +40,5 @@ export const CommandRow = styled.div`
   display: flex;
   flex-direction: row;
 `
+
+export default TerminalWrapper
