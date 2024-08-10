@@ -1,5 +1,6 @@
 import {TerminalWrapper, Prompt, Command, Output, CommandRow, padding, lineHeight} from "./terminal.styles";
 import React, { useEffect, useRef, useState } from "react";
+import { navigate } from "gatsby"
 
 import ScanLines from "../../components/ScanLines.styles";
 import Helmet from "../../layouts/Helmet";
@@ -9,10 +10,13 @@ const MAX_HISTORY_LENGTH = 50
 const OUTPUT_LINE_BUFFER = 20
 const FILE_COUNT_WIDTH = 4
 const COMMANDS = {
+  cat: "Displays the contents of a file",
+  cd: "Changes the current directory",
   clear: "Clears the terminal output",
-  ls: "Lists files in the current directory",
-  help: "Displays this help message",
   exit: "Exits the terminal",
+  help: "Displays this help message",
+  ls: "Lists files in the current directory",
+  open: "Opens a file",
 }
 const ROOT_LISTING = {
   "root": [
@@ -26,25 +30,10 @@ const ROOT_LISTING = {
   ],
   "work": [
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
-    ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "public"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
   ]
 }
 
-const PRINT_COMMANDS = {
-  ls: (directory = "root") => {
-    const matrix = ROOT_LISTING[directory].reduce((acc: string[][], cur, i) => {
-      if(i % FILE_COUNT_WIDTH === 0) {
-        acc.push([])
-      }
-      acc[acc.length - 1].push(cur[cur.length-1])
-      return acc
-    }, [])
-    return matrix
-  },
-  "ls-l": (directory = "root") => ROOT_LISTING[directory],
-  "ls-la": (directory = "root") => [["drwxr-xr-x", "2", "root", "root", "4096", "Jun 20 16:53", "."],["drwxr-xr-x", "8", "root", "root", "4096", "Jun 20 16:53", ".."],...ROOT_LISTING[directory]]
-}
 const INITIAL_OUTPUT = [
   "Welcome to Chris OS!",
   "Type 'help' for a list of commands",
@@ -53,181 +42,243 @@ const INITIAL_OUTPUT = [
   "",
 ]
 const Terminal = () => {
-  const [output, setOutput] = useState<string[]>(INITIAL_OUTPUT)
-  const [history, setHistory] = useState<string[]>([])
-  const [directory, setDirectory] = useState<string>("root")
-  const [historyPointer, setHistoryPointer] = useState<number | null>()
-  const [lines, setLines] = useState<number>(10)
-  const commandDiv = useRef<HTMLInputElement>(null)
-  const terminalDiv = useRef<HTMLDivElement>(null)
-  const outputDiv = useRef<HTMLDivElement>(null)
+  const [terminalOutput, setTerminalOutput] = useState<string[]>(INITIAL_OUTPUT);
+  const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [currentDirectory, setCurrentDirectory] = useState<string>("root");
+  const [commandHistoryPointer, setCommandHistoryPointer] = useState<number | null | undefined>(null);
+  const [numOutputLines, setNumOutputLines] = useState<number>(10);
+  const commandInputRef = useRef<HTMLInputElement>(null);
+  const terminalContainerRef = useRef<HTMLDivElement>(null);
+  const outputContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if(outputDiv.current) {
-      outputDiv.current.scrollTop = outputDiv.current?.scrollHeight;
+    const audio = new Audio('/beep.mp3');
+    audio.loop = false;
+    audio.play();
+  }, []);
+
+  useEffect(() => {
+    if(outputContainerRef.current) {
+      outputContainerRef.current.scrollTop = outputContainerRef.current?.scrollHeight;
     }
-  },[output])
-  useEffect(() => {
-    const gameSound = new Audio('/beep.mp3');
-    gameSound.loop = false;
-    gameSound.play();  
-  },[])
+  },[terminalOutput])
+
   
   useEffect(() => {
-    if(historyPointer !== undefined && historyPointer !== null && commandDiv.current) {
-      commandDiv.current.focus()
-      commandDiv.current.value = history[historyPointer]
-    } else if (historyPointer === null && commandDiv.current) {
-      commandDiv.current.value = ""
+    if(commandHistoryPointer !== undefined && commandHistoryPointer !== null && commandInputRef.current) {
+      commandInputRef.current.focus()
+      commandInputRef.current.value = commandHistory[commandHistoryPointer]
+    } else if (commandHistoryPointer === null && commandInputRef.current) {
+      commandInputRef.current.value = ""
     }
-  },[historyPointer, commandDiv.current])
+  },[commandHistoryPointer])
 
-  const printList = (list: string[][]) => {
-    const lengthArray: number[] = []
-    list.map((list) => {
-      list.map((file, index) => {
-        if(lengthArray[index] === undefined || lengthArray[index]< file.length) {
-          lengthArray[index] = file.length
-        }
-      })
-    })
-    list.map((list, index) => {
-      const line = list.map((file, index) => {
-        // pad with spaces
-        const spaces = "\u00A0".repeat(lengthArray[index] - file.length)
-        return file + spaces
-      })
-      appendOutput(line.join("\u00A0\u00A0"))
-    })
+  useEffect(() => {
+    const terminalHeight = terminalContainerRef.current?.clientHeight ?? 0;
+    const calculatedLines = Math.floor((terminalHeight - (padding * 2)) / lineHeight) + OUTPUT_LINE_BUFFER;
+    setNumOutputLines(calculatedLines);
+  }, [terminalContainerRef.current?.clientHeight]);
+
+  useEffect(() => {
+    commandInputRef.current?.focus()
+  },[commandInputRef.current])
+
+/**
+ * Prints a list of rows with evenly spaced columns.
+ *
+ * @param {string[][]} rows - The list of rows to print.
+ * @return {void} This function does not return anything.
+ */
+  const printList = (rows: string[][]): void => {
+    const columnWidths: number[] = rows[0].map((_, index) =>
+      Math.max(...rows.map(row => row[index] ? row[index].length : 0))
+    );
+
+    rows.forEach(row => {
+      const formattedRow = row.map((value, index) =>
+        value.padEnd(columnWidths[index],"\u00A0")
+      );
+      appendOutputToTerminal(formattedRow.join('\u00A0\u00A0'));
+    });
   }
-  const EXE_COMMANDS = {
+  const EXECUTABLE_COMMANDS = {
     clear: () => {
-      clear();
+      setTerminalOutput([]);
     },
     ls: (args: string[]) => {
-      console.log(args[0])
-      if(PRINT_COMMANDS[`ls${args[0] || ''}`]) {
-        printList(PRINT_COMMANDS[`ls${args[0] || ''}`](directory))
-      } else {
-        appendOutput(`Unknown command: ls ${args.join(" ")}`);
+      const directoryListing = ROOT_LISTING[currentDirectory];
+      const options = args[0] || '';
+
+      switch (options) {
+        case '-l':
+          printList(directoryListing);
+          break;
+        case '-la':
+          const extendedListing = [
+            ['drwxr-xr-x', '2', 'root', 'root', '4096', 'Jun 20 16:53', '.'],
+            ['drwxr-xr-x', '8', 'root', 'root', '4096', 'Jun 20 16:53', '..'],
+            ...directoryListing
+          ];
+          printList(extendedListing);
+          break;
+        default:
+          const formattedListing = directoryListing.reduce((acc, cur, i) => {
+            if (i % FILE_COUNT_WIDTH === 0) {
+              acc.push([]);
+            }
+            acc[acc.length - 1].push(cur[cur.length - 1]);
+            return acc;
+          }, []);
+          printList(formattedListing);
+          break;
       }
     },
     cd: (args: string[]) => {
-      if(ROOT_LISTING[args[0]]) {
-        setDirectory(args[0] || "root");
-      } else if(args[0] === "..") {
-        setDirectory("root");
+      const targetDirectory = args[0];
+
+      if (ROOT_LISTING[targetDirectory]) {
+        setCurrentDirectory(targetDirectory || "root");
+      } else if (targetDirectory === "..") {
+        setCurrentDirectory("root");
       } else {
-        appendOutput("cd: no such file or directory: " + args[0]);
+        const errorMessage = `cd: no such file or directory: ${targetDirectory}`;
+        appendOutputToTerminal(errorMessage);
+      }
+    },
+    mkdir: (directoryNames: string[]) => {
+      const [directoryName] = directoryNames;
+      const errorMessage = `mkdir: cannot create directory '${directoryName}': Permission denied`;
+      appendOutputToTerminal(errorMessage);
+    },
+    touch: (fileNames: string[]) => {
+      const [fileName] = fileNames;
+      const errorMessage = `touch: cannot touch '${fileName}': Permission denied`;
+      appendOutputToTerminal(errorMessage);
+    },
+    open: (args: string[]) => {
+      const targetFile = args[0];
+      if (targetFile === "index.html" || !targetFile) {
+        appendOutputToTerminal("Opening index.html");
+        setTimeout(() => {
+          const destination = currentDirectory === "root" ? "" : currentDirectory;
+          navigate(`/${destination}`);
+        }, 500);
+      } else {
+        const errorMessage = `open: no such file or directory: ${targetFile}`;
+        appendOutputToTerminal(errorMessage);
       }
     },
     help: () => {
-      const helpText = Object.keys(COMMANDS).map((commandString) => {
-        const description = COMMANDS[commandString];
-        return `${commandString}: ${description}`;
-      })
-      appendOutput(helpText);
+      const formattedCommands = Object.entries(COMMANDS).map(([command, description]) => {
+        return `${command}: ${description}`;
+      });
+      const helpText = ['', ...formattedCommands, ''];
+      appendOutputToTerminal(helpText);
     },
     exit: () => {
-      setOutput([...output, "Exiting the terminal"])
+      setTerminalOutput([...terminalOutput, "Exiting the terminal"])
     },
   }
-  const handleKeyDown = (event) => {
-    if (event.key === "Enter") {
-      const command = event.currentTarget.value.trim();
-      event.currentTarget.value = "";
-      setHistoryPointer(undefined)
-      handleCommand(command);
-    } else if (event.key === "ArrowUp" && history.length > 0) {
-      setHistoryPointer((prev) => {
-        if(prev === undefined || prev === null) {
-          return history.length - 1
-        } else if (prev > 0) {
-          return prev - 1
-        }
-        return 0
-      })
-    } else if (event.key === "ArrowDown" && history.length > 0) {
-      setHistoryPointer((prev) => {
-        if(prev === undefined) {
-          return 0
-        } else if (prev !== null && prev < history.length - 1) {
-          return prev + 1
-        }
-        return null
-      })
-    }
-  }
-
-  useEffect(() => {
-    const height = terminalDiv.current?.clientHeight || 0
-    const lines = (height - (padding*2)) / lineHeight
-    setLines(Math.floor(lines) + OUTPUT_LINE_BUFFER)
-  },[terminalDiv.current?.clientHeight])
-
-  useEffect(() => {
-    commandDiv.current?.focus()
-  },[commandDiv.current])
-
-  const handleCommand = (command) => {
-    if(command !== "") {
-      setHistory((prev) => {
-        if(prev.length > MAX_HISTORY_LENGTH) {
-          prev.shift()
-        }
-        return [...prev, command]
-      });
-    }
-    const commandArray = command.split(" ");
-    const commandToRun = commandArray.shift()
-    if (EXE_COMMANDS[commandToRun]) {
-      appendOutput(`${renderPrompt()} ${command}`);
-      EXE_COMMANDS[commandToRun](commandArray)
-    } else if (commandArray[0] === "cd") {
-      if(ROOT_LISTING[commandArray[1]]) {
-        setDirectory(commandArray[1] || "root");
-      }
-    } else if (command === "") {
-      appendOutput("");
-    } else {
-      appendOutput(`Unknown command: ${command}`);
-    }
-  }
-
-  const clear = () => {
-    setOutput([]);
-  }
-
   /**
-   * Appends the given output to the output element and scrolls to the bottom.
+   * Handles key down events in the terminal input field.
    *
-   * @param {string} output - The output to append.
+   *  Handles the Enter key by executing the current command, and the
+   *  ArrowUp and ArrowDown keys by navigating through the command history.
+   *
+   * @param {React.KeyboardEvent<HTMLInputElement>} event - The key down event.
    * @return {void}
    */
-  const appendOutput = (newOutput: string | string[]) => {
-    setOutput((prev) => {
-      if(prev.length > lines) {
-        prev.shift()
-      }
-      if(Array.isArray(newOutput)) {
-        return [...prev, ...newOutput]
-      }
-      return [...prev, newOutput]
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const { key, currentTarget } = event;
+    const { value } = currentTarget;
+
+    if (key === "Enter") {
+      const command = value.trim();
+      currentTarget.value = "";
+      setCommandHistoryPointer(undefined);
+      executeCommand(command);
+    } else if (key === "ArrowUp" && commandHistory.length > 0) {
+      setCommandHistoryPointer((prevPointer) =>
+        prevPointer === undefined || prevPointer === null
+          ? commandHistory.length - 1
+          : Math.max(0, prevPointer - 1)
+      );
+    } else if (key === "ArrowDown" && commandHistory.length > 0) {
+      setCommandHistoryPointer((prevPointer) =>
+        prevPointer === undefined
+          ? 0
+          : prevPointer !== null && prevPointer < commandHistory.length - 1
+          ? prevPointer + 1
+          : null
+      );
+    }
+  };
+
+
+  /**
+   * Executes a command in the terminal.
+   *
+   * Updates the command history, parses the command and its arguments, and
+   * executes the corresponding function if it exists. If the command is empty
+   * or unknown, appends an appropriate message to the terminal output.
+   *
+   * @param {string} command - The command to be executed.
+   * @return {void}
+   */
+  const executeCommand = (command: string) => {
+    if (command !== '') {
+      setCommandHistory((previousHistory) => {
+        const newHistory = previousHistory.length > MAX_HISTORY_LENGTH
+          ? previousHistory.slice(1)
+          : previousHistory;
+        return [...newHistory, command];
+      });
+    }
+
+    const [commandName, ...commandArguments] = command.split(' ');
+
+    if (EXECUTABLE_COMMANDS[commandName]) {
+      appendOutputToTerminal(`${renderPrompt()} ${command}`);
+      EXECUTABLE_COMMANDS[commandName](commandArguments);
+    } else if (command === '') {
+      appendOutputToTerminal('');
+    } else {
+      appendOutputToTerminal(`Unknown command: ${command}`);
+    }
+  };
+
+  /**
+   * Function to append output to the terminal.
+   *
+   * @param {string | string[]} newOutput - The new output to append.
+   * @return {string[]} The updated output sliced to fit the specified number of lines.
+   */
+  const appendOutputToTerminal = (newOutput: string | string[]) => {
+    setTerminalOutput((previousOutput) => {
+      const updatedOutput = Array.isArray(newOutput)
+        ? [...previousOutput, ...newOutput]
+        : [...previousOutput, newOutput];
+
+      return updatedOutput.slice(-numOutputLines);
     });
   }
   const renderOutput = () => {
-    return output.map((o, i) => <div key={i}>{o}</div>);
+    return terminalOutput.map((outputLine, index) => (
+      <div key={index}>{outputLine}</div>
+    ));
   }
-  const renderPrompt = () => {
-    return `guest@chris-os:~${directory && directory !== "root" ? `/${directory}` : ""}$`
+  const renderPrompt = (): string => {
+    const directoryPath = currentDirectory && currentDirectory !== "root" ? `/${currentDirectory}` : "";
+    return `guest@chris-os:~${directoryPath}$`;
   }
   return (
-    <ScanLines onClick={() => commandDiv.current?.focus()}>
+    <ScanLines onClick={() => commandInputRef.current?.focus()}>
       <Helmet title="Terminal - Chris OS" />
-      <TerminalWrapper ref={terminalDiv}>
-        <Output ref={outputDiv}>{renderOutput()}</Output>
+      <TerminalWrapper ref={terminalContainerRef}>
+        <Output ref={outputContainerRef}>{renderOutput()}</Output>
         <CommandRow>
           <Prompt>{renderPrompt()}</Prompt>
-          <Command type="text" ref={commandDiv} onKeyDown={handleKeyDown} className="command" />
+          <Command type="text" ref={commandInputRef} onKeyDown={handleKeyDown} className="command" />
         </CommandRow>
       </TerminalWrapper>
     </ScanLines>
