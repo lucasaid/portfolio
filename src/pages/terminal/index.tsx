@@ -66,25 +66,26 @@ const playFloppy = () => {
   audio.play();
 }
 const playNaughty = () => {
-  const audio = new Audio('/dennis_no.mp3');
+  const audio = new Audio('/dennis.mp3');
   audio.loop = false;
   audio.play();
 }
 const Terminal = ({ data }) => {
-  const [terminalOutput, setTerminalOutput] = useState<Array<string | Element>>(INITIAL_OUTPUT);
+  const [terminalOutput, setTerminalOutput] = useState<Array<string | React.ReactElement>>(INITIAL_OUTPUT);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [currentDirectory, setCurrentDirectory] = useState<string>("root");
   const [commandHistoryPointer, setCommandHistoryPointer] = useState<number | null | undefined>(null);
   const [numOutputLines, setNumOutputLines] = useState<number>(10);
-  const [blogPosts] = useState<any[]>(data.blog.posts);
   const commandInputRef = useRef<HTMLInputElement>(null);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
   const outputContainerRef = useRef<HTMLDivElement>(null);
 
+  
   useEffect(() => {
     playBeep();
-  
-    blogPosts.map((post) => {
+
+    // TODO: fix this re-rendering when user navigates away and back, ROOT_LISTING does not reset
+    data.blog.posts.map((post) => {
       const file = post.fileAbsolutePath.split("/").pop()
       ROOT_LISTING["blog"].push(["-rwxrwxr-x", "1", "root", "root", "4096", formatDate(new Date(post.frontmatter.date)), file])
     })
@@ -309,7 +310,7 @@ const Terminal = ({ data }) => {
    * @param {string | string[]} newOutput - The new output to append.
    * @return {string[]} The updated output sliced to fit the specified number of lines.
    */
-  const appendOutputToTerminal = (newOutput: string | string[] | Element) => {
+  const appendOutputToTerminal = (newOutput: string | string[] | React.ReactElement) => {
     setTerminalOutput((previousOutput) => {
       const updatedOutput = Array.isArray(newOutput)
         ? [...previousOutput, ...newOutput]
