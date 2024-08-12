@@ -1,6 +1,6 @@
 import {TerminalWrapper, Prompt, Command, Output, CommandRow, padding, lineHeight} from "./terminal.styles";
 import React, { useEffect, useRef, useState } from "react";
-import { navigate } from "gatsby"
+import { graphql, navigate } from "gatsby"
 
 import ScanLines from "../../components/ScanLines.styles";
 import Helmet from "../../layouts/Helmet";
@@ -18,17 +18,30 @@ const COMMANDS = {
   ls: "Lists files in the current directory",
   open: "Opens a file",
 }
+const formatDate = (date: Date): string => {
+  const formattedDate = new Date(date);
+  const formattedDay = formattedDate.toLocaleString('en-US', { day: 'numeric', month: 'short' });
+  const formattedTime = formattedDate.toLocaleString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+  return `${formattedDay} ${formattedTime}`;
+}
 const ROOT_LISTING = {
   "root": [
+    ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "blog"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
-    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.tsx"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "package.json"],
-    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "package-lock.json"],
     ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "public"],
     ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "work"],
   ],
   "work": [
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
+  ],
+  "blog": [
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
   ]
@@ -41,20 +54,40 @@ const INITIAL_OUTPUT = [
   `Today is ${new Date().toDateString()}`,
   "",
 ]
-const Terminal = () => {
-  const [terminalOutput, setTerminalOutput] = useState<string[]>(INITIAL_OUTPUT);
+const readTimeout = 1000
+const playBeep = () => {
+  const audio = new Audio('/beep.mp3');
+  audio.loop = false;
+  audio.play();
+}
+const playFloppy = () => {
+  const audio = new Audio('/floppy_disk.mp3');
+  audio.loop = false;
+  audio.play();
+}
+const playNaughty = () => {
+  const audio = new Audio('/dennis_no.mp3');
+  audio.loop = false;
+  audio.play();
+}
+const Terminal = ({ data }) => {
+  const [terminalOutput, setTerminalOutput] = useState<Array<string | Element>>(INITIAL_OUTPUT);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [currentDirectory, setCurrentDirectory] = useState<string>("root");
   const [commandHistoryPointer, setCommandHistoryPointer] = useState<number | null | undefined>(null);
   const [numOutputLines, setNumOutputLines] = useState<number>(10);
+  const [blogPosts] = useState<any[]>(data.blog.posts);
   const commandInputRef = useRef<HTMLInputElement>(null);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
   const outputContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const audio = new Audio('/beep.mp3');
-    audio.loop = false;
-    audio.play();
+    playBeep();
+  
+    blogPosts.map((post) => {
+      const file = post.fileAbsolutePath.split("/").pop()
+      ROOT_LISTING["blog"].push(["-rwxrwxr-x", "1", "root", "root", "4096", formatDate(new Date(post.frontmatter.date)), file])
+    })
   }, []);
 
   useEffect(() => {
@@ -101,6 +134,12 @@ const Terminal = () => {
       appendOutputToTerminal(formattedRow.join('\u00A0\u00A0'));
     });
   }
+  const accessDenied = () => {
+    playNaughty()
+    appendOutputToTerminal("");
+    appendOutputToTerminal(<img src="/dennis.gif"/>);
+    appendOutputToTerminal("");
+  }
   const EXECUTABLE_COMMANDS = {
     clear: () => {
       setTerminalOutput([]);
@@ -145,6 +184,8 @@ const Terminal = () => {
         appendOutputToTerminal(errorMessage);
       }
     },
+    sudo: accessDenied,
+    ssh: accessDenied,
     mkdir: (directoryNames: string[]) => {
       const [directoryName] = directoryNames;
       const errorMessage = `mkdir: cannot create directory '${directoryName}': Permission denied`;
@@ -157,15 +198,30 @@ const Terminal = () => {
     },
     open: (args: string[]) => {
       const targetFile = args[0];
+      playFloppy()
       if (targetFile === "index.html" || !targetFile) {
-        appendOutputToTerminal("Opening index.html");
+        appendOutputToTerminal("Opening index.html...");
+        const destination = currentDirectory === "root" ? "" : currentDirectory;
         setTimeout(() => {
-          const destination = currentDirectory === "root" ? "" : currentDirectory;
           navigate(`/${destination}`);
-        }, 500);
+        }, readTimeout);
       } else {
-        const errorMessage = `open: no such file or directory: ${targetFile}`;
-        appendOutputToTerminal(errorMessage);
+        const foundFile = ROOT_LISTING[currentDirectory].find((file) => {
+          return file[6] === targetFile
+        })
+
+        if(foundFile){
+          appendOutputToTerminal(`Opening ${targetFile}...`);
+          setTimeout(() => {
+            navigate(`/${currentDirectory}/${targetFile.split('.')[0]}`);
+          }, readTimeout);
+        } else {
+          appendOutputToTerminal(`Opening ${targetFile}...`);
+          const errorMessage = `open: no such file or directory: ${targetFile}`;
+          setTimeout(() => {
+            appendOutputToTerminal(errorMessage);
+          }, readTimeout);
+        }
       }
     },
     help: () => {
@@ -253,7 +309,7 @@ const Terminal = () => {
    * @param {string | string[]} newOutput - The new output to append.
    * @return {string[]} The updated output sliced to fit the specified number of lines.
    */
-  const appendOutputToTerminal = (newOutput: string | string[]) => {
+  const appendOutputToTerminal = (newOutput: string | string[] | Element) => {
     setTerminalOutput((previousOutput) => {
       const updatedOutput = Array.isArray(newOutput)
         ? [...previousOutput, ...newOutput]
@@ -284,4 +340,18 @@ const Terminal = () => {
     </ScanLines>
   );
 }
+
+export const pageQuery = graphql`
+  query MyQuery {
+    blog: allMarkdownRemark {
+      posts: nodes {
+        frontmatter {
+          date
+        }
+        fileAbsolutePath
+        id
+      }
+    }
+  }
+`
 export default Terminal

@@ -1,4 +1,4 @@
-import { graphql } from "gatsby";
+import { graphql, Link } from "gatsby";
 import Img from "gatsby-image";
 import React from "react";
 import FontAwesome from "react-fontawesome";
@@ -101,6 +101,21 @@ const IndexPage = (props) => {
             </span>
           </a>
         </section>
+        {/* <section className="terminal">
+          <Link to='/terminal'><pre>
+            <code>
+            {`  .---------.
+  |.-------.|
+  ||>run#  ||
+  ||       ||
+  |"-------'|
+.-^---------^-.
+| ---~        |
+"-------------'`}
+            </code>
+          </pre>
+          </Link>
+        </section> */}
       </div>
     </MainLayout>
   );

@@ -68,6 +68,11 @@ a {
   margin: 5vh auto;
   text-align: center;
 }
+.terminal {
+  margin: 5vh auto;
+  display: flex;
+  justify-content: center;
+}
 .links {
   align-items: center;
   display: flex;
@@ -82,4 +87,11 @@ a {
 }
 .icon {
   font-size: 28px;
+}
+pre {
+  line-height: 17.5px;
+  display: block;
+  padding: 15px;
+  background-color: transparent;
+  color: inherit;
 }
