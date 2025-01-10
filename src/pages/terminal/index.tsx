@@ -17,6 +17,7 @@ const COMMANDS = {
   help: "Displays this help message",
   ls: "Lists files in the current directory",
   open: "Opens a file",
+  sudo: "Executes a command as root",
 }
 const formatDate = (date: Date): string => {
   const formattedDate = new Date(date);
@@ -30,14 +31,14 @@ const formatDate = (date: Date): string => {
 }
 const ROOT_LISTING = {
   "root": [
-    ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "blog"],
+    // ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "blog"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "package.json"],
     ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "public"],
-    ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "work"],
+    ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "now"],
   ],
-  "work": [
+  "now": [
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
   ],
@@ -50,6 +51,11 @@ const ROOT_LISTING = {
 const INITIAL_OUTPUT = [
   "Welcome to Chris OS!",
   "Type 'help' for a list of commands",
+  "",
+  "Example:",
+  "ls",
+  "cd now",
+  "open",
   "",
   `Today is ${new Date().toDateString()}`,
   "",
@@ -233,7 +239,14 @@ const Terminal = ({ data }) => {
       appendOutputToTerminal(helpText);
     },
     exit: () => {
+      playFloppy()
       setTerminalOutput([...terminalOutput, "Exiting the terminal"])
+      setTimeout(() => {
+        navigate(`/`);
+      }, readTimeout);
+    },
+    cat: () => {
+      setTerminalOutput([...terminalOutput, "cat: Not implemented yet"])
     },
   }
   /**

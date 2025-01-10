@@ -2,6 +2,7 @@
 import { graphql, Link } from "gatsby"
 import React from "react"
 import styled from 'styled-components'
+import MainLayout from "../../layouts/main"
 
 export default function Blog({ data }) {
 
@@ -38,23 +39,25 @@ export default function Blog({ data }) {
   const { posts } = data.blog
 
   return (
-    <Container>
-    <Header>
-      <h1>Monkey Thoughts</h1>
-    </Header>
-    <BlogList>
+    <MainLayout>
+      <Container>
+      <Header>
+        <h1>Monkey Thoughts</h1>
+      </Header>
+      <BlogList>
 
-      {posts.map(post => (
-        <Blog key={post.is}>
-          <Link to={post.fields.slug}>
-            <BlogTitle>{post.frontmatter.title}</BlogTitle>
-          </Link>
-          <BlogDate>{post.frontmatter.author}, {post.frontmatter.date}</BlogDate>
-          <p>{post.excerpt}</p>
-        </Blog>
-      ))}
-      </BlogList>
-    </Container>
+        {posts.map(post => (
+          <Blog key={post.is}>
+            <Link to={post.fields.slug}>
+              <BlogTitle>{post.frontmatter.title}</BlogTitle>
+            </Link>
+            <BlogDate>{post.frontmatter.author}, {post.frontmatter.date}</BlogDate>
+            <p>{post.excerpt}</p>
+          </Blog>
+        ))}
+        </BlogList>
+      </Container>
+    </MainLayout>
   )
 }
 

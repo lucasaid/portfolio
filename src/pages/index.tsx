@@ -37,12 +37,15 @@ const IndexPage = (props) => {
           <br />
           Coder
           <br />
-          Gamer
+          Tinkerer
           <br />
           Dad
           <br />
           <br />
           <em>Melbourne, Australia</em>
+          <br />
+          <br />
+          What's happening <Link to='/now'>/now</Link>?
         </section>
         <section className="links">
           <a
@@ -101,7 +104,7 @@ const IndexPage = (props) => {
             </span>
           </a>
         </section>
-        {/* <section className="terminal">
+        <section className="terminal">
           <Link to='/terminal'><pre>
             <code>
             {`  .---------.
@@ -115,7 +118,7 @@ const IndexPage = (props) => {
             </code>
           </pre>
           </Link>
-        </section> */}
+        </section>
       </div>
     </MainLayout>
   );
