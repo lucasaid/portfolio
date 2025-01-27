@@ -83,17 +83,6 @@ const IndexPage = (props) => {
           </a>
           <a
             className="link"
-            href="https://twitter.com/chriscre8s"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span className="link_text">twitter</span>
-            <span className="icon">
-              <FontAwesome name="twitter" />
-            </span>
-          </a>
-          <a
-            className="link"
             href="https://www.instagram.com/chriscre8s/"
             target="_blank"
             rel="noopener noreferrer"
