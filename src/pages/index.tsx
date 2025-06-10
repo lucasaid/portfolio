@@ -30,9 +30,9 @@ const IndexPage = (props) => {
           </div>
         </header>
         <section className="description">
-          <h2>Senior Front End Developer</h2>
+          <h2>Lead Front End Developer</h2>
           <br />
-          Currently @ <a href="https://www.skedulo.com/" target="_blank">Skedulo</a>
+          Currently @ Animo Studios
           <br />
           <br />
           Coder
@@ -116,7 +116,7 @@ const IndexPage = (props) => {
 export default IndexPage;
 export const query = graphql`
   query {
-    file(relativePath: { eq: "profile.jpg" }) {
+    file(relativePath: { eq: "profile_cyber.png" }) {
       childImageSharp {
         fluid {
           ...GatsbyImageSharpFluid_withWebp_tracedSVG
