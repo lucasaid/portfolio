@@ -4,15 +4,13 @@ import Helmet from "./Helmet";
 import CanvasBg from "../components/CanvasBg";
 import "../stylesheets/all.scss";
 
-const MainLayout = (props) => {
+const MainLayout = ({ children }: React.PropsWithChildren) => {
   return (
     <div>
       <Helmet />
-      <div>
-        <main>{props.children}</main>
-      </div>
+      <main>{children}</main>
       <CanvasBg />
-      </div>
+    </div>
   )
 }
 

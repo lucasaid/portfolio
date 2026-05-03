@@ -1,5 +1,5 @@
 import {TerminalWrapper, Prompt, Command, Output, CommandRow, padding, lineHeight} from "./terminal.styles";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { graphql, navigate } from "gatsby"
 
 import ScanLines from "../../components/ScanLines.styles";
@@ -8,17 +8,37 @@ import Helmet from "../../layouts/Helmet";
 const MAX_HISTORY_LENGTH = 50
 // Allows extra buffer of lines before removing them from the array
 const OUTPUT_LINE_BUFFER = 20
+// Number of filenames displayed per row in default ls output
 const FILE_COUNT_WIDTH = 4
-const COMMANDS = {
+const NAVIGATION_DELAY_MS = 1000
+
+type DirectoryEntry = string[]
+type DirectoryListing = Record<string, DirectoryEntry[]>
+
+interface TerminalData {
+  blog: {
+    posts: Array<{
+      frontmatter: { date: string }
+      fileAbsolutePath: string
+      id: string
+    }>
+  }
+}
+
+const COMMAND_DESCRIPTIONS: Record<string, string> = {
   cat: "Displays the contents of a file",
   cd: "Changes the current directory",
   clear: "Clears the terminal output",
   exit: "Exits the terminal",
   help: "Displays this help message",
   ls: "Lists files in the current directory",
+  mkdir: "Create a directory",
   open: "Opens a file",
+  ssh: "Connect to remote host",
   sudo: "Executes a command as root",
+  touch: "Create a file",
 }
+
 const formatDate = (date: Date): string => {
   const formattedDate = new Date(date);
   const formattedDay = formattedDate.toLocaleString('en-US', { day: 'numeric', month: 'short' });
@@ -29,9 +49,9 @@ const formatDate = (date: Date): string => {
   });
   return `${formattedDay} ${formattedTime}`;
 }
-const ROOT_LISTING = {
+
+const BASE_LISTING: DirectoryListing = {
   "root": [
-    // ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "blog"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
     ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "package.json"],
@@ -60,23 +80,13 @@ const INITIAL_OUTPUT = [
   `Today is ${new Date().toDateString()}`,
   "",
 ]
-const readTimeout = 1000
-const playBeep = () => {
-  const audio = new Audio('/beep.mp3');
-  audio.loop = false;
+
+const playAudio = (src: string): void => {
+  const audio = new Audio(src);
   audio.play();
 }
-const playFloppy = () => {
-  const audio = new Audio('/floppy_disk.mp3');
-  audio.loop = false;
-  audio.play();
-}
-const playNaughty = () => {
-  const audio = new Audio('/dennis.mp3');
-  audio.loop = false;
-  audio.play();
-}
-const Terminal = ({ data }) => {
+
+const Terminal = ({ data }: { data: TerminalData }) => {
   const [terminalOutput, setTerminalOutput] = useState<Array<string | React.ReactElement>>(INITIAL_OUTPUT);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [currentDirectory, setCurrentDirectory] = useState<string>("root");
@@ -86,49 +96,56 @@ const Terminal = ({ data }) => {
   const terminalContainerRef = useRef<HTMLDivElement>(null);
   const outputContainerRef = useRef<HTMLDivElement>(null);
 
-  
-  useEffect(() => {
-    playBeep();
-
-    // TODO: fix this re-rendering when user navigates away and back, ROOT_LISTING does not reset
-    data.blog.posts.map((post) => {
-      const file = post.fileAbsolutePath.split("/").pop()
-      ROOT_LISTING["blog"].push(["-rwxrwxr-x", "1", "root", "root", "4096", formatDate(new Date(post.frontmatter.date)), file])
+  const directoryListing: DirectoryListing = useMemo(() => {
+    const blogEntries: DirectoryEntry[] = data.blog.posts.map((post) => {
+      const fileName = post.fileAbsolutePath.split("/").pop() ?? ""
+      return ["-rwxrwxr-x", "1", "root", "root", "4096", formatDate(new Date(post.frontmatter.date)), fileName]
     })
+    return {
+      ...BASE_LISTING,
+      blog: [...BASE_LISTING.blog, ...blogEntries],
+    }
+  }, [data.blog.posts])
+
+  useEffect(() => {
+    playAudio('/beep.mp3');
   }, []);
 
   useEffect(() => {
-    if(outputContainerRef.current) {
-      outputContainerRef.current.scrollTop = outputContainerRef.current?.scrollHeight;
+    if (outputContainerRef.current) {
+      outputContainerRef.current.scrollTop = outputContainerRef.current.scrollHeight;
     }
-  },[terminalOutput])
+  }, [terminalOutput])
 
-  
   useEffect(() => {
-    if(commandHistoryPointer !== undefined && commandHistoryPointer !== null && commandInputRef.current) {
+    if (commandHistoryPointer !== undefined && commandHistoryPointer !== null && commandInputRef.current) {
       commandInputRef.current.focus()
       commandInputRef.current.value = commandHistory[commandHistoryPointer]
     } else if (commandHistoryPointer === null && commandInputRef.current) {
       commandInputRef.current.value = ""
     }
-  },[commandHistoryPointer])
+  }, [commandHistoryPointer])
 
   useEffect(() => {
-    const terminalHeight = terminalContainerRef.current?.clientHeight ?? 0;
-    const calculatedLines = Math.floor((terminalHeight - (padding * 2)) / lineHeight) + OUTPUT_LINE_BUFFER;
-    setNumOutputLines(calculatedLines);
-  }, [terminalContainerRef.current?.clientHeight]);
+    const calculateLines = () => {
+      const terminalHeight = terminalContainerRef.current?.clientHeight ?? 0;
+      const calculatedLines = Math.floor((terminalHeight - (padding * 2)) / lineHeight) + OUTPUT_LINE_BUFFER;
+      setNumOutputLines(calculatedLines);
+    };
+
+    calculateLines();
+
+    const observer = new ResizeObserver(calculateLines);
+    if (terminalContainerRef.current) {
+      observer.observe(terminalContainerRef.current);
+    }
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     commandInputRef.current?.focus()
-  },[commandInputRef.current])
+  }, [])
 
-/**
- * Prints a list of rows with evenly spaced columns.
- *
- * @param {string[][]} rows - The list of rows to print.
- * @return {void} This function does not return anything.
- */
   const printList = (rows: string[][]): void => {
     const columnWidths: number[] = rows[0].map((_, index) =>
       Math.max(...rows.map(row => row[index] ? row[index].length : 0))
@@ -136,39 +153,52 @@ const Terminal = ({ data }) => {
 
     rows.forEach(row => {
       const formattedRow = row.map((value, index) =>
-        value.padEnd(columnWidths[index],"\u00A0")
+        value.padEnd(columnWidths[index], " ")
       );
-      appendOutputToTerminal(formattedRow.join('\u00A0\u00A0'));
+      appendOutputToTerminal(formattedRow.join('  '));
     });
   }
+
   const accessDenied = () => {
-    playNaughty()
+    playAudio('/dennis.mp3')
     appendOutputToTerminal("");
-    appendOutputToTerminal(<img src="/dennis.gif"/>);
+    appendOutputToTerminal(<img src="/dennis.gif" alt="Access denied" width={400} height={300} />);
     appendOutputToTerminal("");
   }
-  const EXECUTABLE_COMMANDS = {
+
+  const appendOutputToTerminal = (newOutput: string | string[] | React.ReactElement) => {
+    setTerminalOutput((previousOutput) => {
+      const updatedOutput = Array.isArray(newOutput)
+        ? [...previousOutput, ...newOutput]
+        : [...previousOutput, newOutput];
+
+      return updatedOutput.slice(-numOutputLines);
+    });
+  }
+
+  const EXECUTABLE_COMMANDS: Record<string, (args: string[]) => void> = {
     clear: () => {
       setTerminalOutput([]);
     },
     ls: (args: string[]) => {
-      const directoryListing = ROOT_LISTING[currentDirectory];
+      const listing = directoryListing[currentDirectory];
       const options = args[0] || '';
 
       switch (options) {
         case '-l':
-          printList(directoryListing);
+          printList(listing);
           break;
         case '-la':
           const extendedListing = [
             ['drwxr-xr-x', '2', 'root', 'root', '4096', 'Jun 20 16:53', '.'],
             ['drwxr-xr-x', '8', 'root', 'root', '4096', 'Jun 20 16:53', '..'],
-            ...directoryListing
+            ...listing
           ];
           printList(extendedListing);
           break;
         default:
-          const formattedListing = directoryListing.reduce((acc, cur, i) => {
+          // Group filenames into rows of FILE_COUNT_WIDTH for compact display
+          const formattedListing = listing.reduce((acc: string[][], cur: string[], i: number) => {
             if (i % FILE_COUNT_WIDTH === 0) {
               acc.push([]);
             }
@@ -182,82 +212,67 @@ const Terminal = ({ data }) => {
     cd: (args: string[]) => {
       const targetDirectory = args[0];
 
-      if (ROOT_LISTING[targetDirectory]) {
+      if (directoryListing[targetDirectory]) {
         setCurrentDirectory(targetDirectory || "root");
       } else if (targetDirectory === "..") {
         setCurrentDirectory("root");
       } else {
-        const errorMessage = `cd: no such file or directory: ${targetDirectory}`;
-        appendOutputToTerminal(errorMessage);
+        appendOutputToTerminal(`cd: no such file or directory: ${targetDirectory}`);
       }
     },
     sudo: accessDenied,
     ssh: accessDenied,
-    mkdir: (directoryNames: string[]) => {
-      const [directoryName] = directoryNames;
-      const errorMessage = `mkdir: cannot create directory '${directoryName}': Permission denied`;
-      appendOutputToTerminal(errorMessage);
+    mkdir: (args: string[]) => {
+      const [directoryName] = args;
+      appendOutputToTerminal(`mkdir: cannot create directory '${directoryName}': Permission denied`);
     },
-    touch: (fileNames: string[]) => {
-      const [fileName] = fileNames;
-      const errorMessage = `touch: cannot touch '${fileName}': Permission denied`;
-      appendOutputToTerminal(errorMessage);
+    touch: (args: string[]) => {
+      const [fileName] = args;
+      appendOutputToTerminal(`touch: cannot touch '${fileName}': Permission denied`);
     },
     open: (args: string[]) => {
       const targetFile = args[0];
-      playFloppy()
+      playAudio('/floppy_disk.mp3')
       if (targetFile === "index.html" || !targetFile) {
         appendOutputToTerminal("Opening index.html...");
         const destination = currentDirectory === "root" ? "" : currentDirectory;
         setTimeout(() => {
           navigate(`/${destination}`);
-        }, readTimeout);
+        }, NAVIGATION_DELAY_MS);
       } else {
-        const foundFile = ROOT_LISTING[currentDirectory].find((file) => {
-          return file[6] === targetFile
-        })
+        const foundFile = directoryListing[currentDirectory].find((file) => file[file.length - 1] === targetFile)
 
-        if(foundFile){
+        if (foundFile) {
           appendOutputToTerminal(`Opening ${targetFile}...`);
           setTimeout(() => {
             navigate(`/${currentDirectory}/${targetFile.split('.')[0]}`);
-          }, readTimeout);
+          }, NAVIGATION_DELAY_MS);
         } else {
           appendOutputToTerminal(`Opening ${targetFile}...`);
-          const errorMessage = `open: no such file or directory: ${targetFile}`;
           setTimeout(() => {
-            appendOutputToTerminal(errorMessage);
-          }, readTimeout);
+            appendOutputToTerminal(`open: no such file or directory: ${targetFile}`);
+          }, NAVIGATION_DELAY_MS);
         }
       }
     },
     help: () => {
-      const formattedCommands = Object.entries(COMMANDS).map(([command, description]) => {
+      const formattedCommands = Object.entries(COMMAND_DESCRIPTIONS).map(([command, description]) => {
         return `${command}: ${description}`;
       });
-      const helpText = ['', ...formattedCommands, ''];
-      appendOutputToTerminal(helpText);
+      appendOutputToTerminal(['', ...formattedCommands, '']);
     },
     exit: () => {
-      playFloppy()
-      setTerminalOutput([...terminalOutput, "Exiting the terminal"])
+      playAudio('/floppy_disk.mp3')
+      setTerminalOutput((prev) => [...prev, "Exiting the terminal"])
       setTimeout(() => {
         navigate(`/`);
-      }, readTimeout);
+      }, NAVIGATION_DELAY_MS);
     },
     cat: () => {
-      setTerminalOutput([...terminalOutput, "cat: Not implemented yet"])
+      setTerminalOutput((prev) => [...prev, "cat: Not implemented yet"])
     },
   }
-  /**
-   * Handles key down events in the terminal input field.
-   *
-   *  Handles the Enter key by executing the current command, and the
-   *  ArrowUp and ArrowDown keys by navigating through the command history.
-   *
-   * @param {React.KeyboardEvent<HTMLInputElement>} event - The key down event.
-   * @return {void}
-   */
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     const { key, currentTarget } = event;
     const { value } = currentTarget;
@@ -284,17 +299,6 @@ const Terminal = ({ data }) => {
     }
   };
 
-
-  /**
-   * Executes a command in the terminal.
-   *
-   * Updates the command history, parses the command and its arguments, and
-   * executes the corresponding function if it exists. If the command is empty
-   * or unknown, appends an appropriate message to the terminal output.
-   *
-   * @param {string} command - The command to be executed.
-   * @return {void}
-   */
   const executeCommand = (command: string) => {
     if (command !== '') {
       setCommandHistory((previousHistory) => {
@@ -317,30 +321,17 @@ const Terminal = ({ data }) => {
     }
   };
 
-  /**
-   * Function to append output to the terminal.
-   *
-   * @param {string | string[]} newOutput - The new output to append.
-   * @return {string[]} The updated output sliced to fit the specified number of lines.
-   */
-  const appendOutputToTerminal = (newOutput: string | string[] | React.ReactElement) => {
-    setTerminalOutput((previousOutput) => {
-      const updatedOutput = Array.isArray(newOutput)
-        ? [...previousOutput, ...newOutput]
-        : [...previousOutput, newOutput];
-
-      return updatedOutput.slice(-numOutputLines);
-    });
-  }
   const renderOutput = () => {
     return terminalOutput.map((outputLine, index) => (
       <div key={index}>{outputLine}</div>
     ));
   }
+
   const renderPrompt = (): string => {
     const directoryPath = currentDirectory && currentDirectory !== "root" ? `/${currentDirectory}` : "";
     return `guest@chris-os:~${directoryPath}$`;
   }
+
   return (
     <ScanLines onClick={() => commandInputRef.current?.focus()}>
       <Helmet title="Terminal - Chris OS" />
@@ -348,7 +339,7 @@ const Terminal = ({ data }) => {
         <Output ref={outputContainerRef}>{renderOutput()}</Output>
         <CommandRow>
           <Prompt>{renderPrompt()}</Prompt>
-          <Command type="text" ref={commandInputRef} onKeyDown={handleKeyDown} className="command" />
+          <Command type="text" ref={commandInputRef} onKeyDown={handleKeyDown} className="command" aria-label="Terminal command input" name="command" autoComplete="off" />
         </CommandRow>
       </TerminalWrapper>
     </ScanLines>

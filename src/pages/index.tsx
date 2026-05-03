@@ -15,7 +15,7 @@ interface Props {
     };
   };
 }
-const IndexPage = (props) => {
+const IndexPage = (props: Props) => {
   return (
     <MainLayout>
       <div className="container">
@@ -45,7 +45,7 @@ const IndexPage = (props) => {
           <em>Melbourne, Australia</em>
           <br />
           <br />
-          What's happening <Link to='/now'>/now</Link>?
+          What&rsquo;s happening <Link to='/now'>/now</Link>?
         </section>
         <section className="links">
           <a
@@ -55,7 +55,7 @@ const IndexPage = (props) => {
             rel="noopener noreferrer"
           >
             <span className="link_text">github</span>
-            <span className="icon">
+            <span className="icon" aria-hidden="true">
               <FontAwesome name="github" />
             </span>
           </a>
@@ -66,7 +66,7 @@ const IndexPage = (props) => {
             rel="noopener noreferrer"
           >
             <span className="link_text">codepen</span>
-            <span className="icon">
+            <span className="icon" aria-hidden="true">
               <FontAwesome name="codepen" />
             </span>
           </a>
@@ -77,7 +77,7 @@ const IndexPage = (props) => {
             rel="noopener noreferrer"
           >
             <span className="link_text">linkedin</span>
-            <span className="icon">
+            <span className="icon" aria-hidden="true">
               <FontAwesome name="linkedin" />
             </span>
           </a>
@@ -88,7 +88,7 @@ const IndexPage = (props) => {
             rel="noopener noreferrer"
           >
             <span className="link_text">instagram</span>
-            <span className="icon">
+            <span className="icon" aria-hidden="true">
               <FontAwesome name="instagram" />
             </span>
           </a>

@@ -1,50 +1,55 @@
 import React, { useRef, useEffect } from "react";
-const draw = (x, y, width, height, context) => {
-  if(context) {
-    const leftToRight = Math.random() >= 0.5;
 
-    if (leftToRight) {
-      context.moveTo(x, y);
-      context.lineTo(x + width, y + height);
-    } else {
-      context.moveTo(x + width, y);
-      context.lineTo(x, y + height);
-    }
+const GRID_STEP_PX = 60;
+
+const draw = (x: number, y: number, width: number, height: number, context: CanvasRenderingContext2D): void => {
+  const leftToRight = Math.random() >= 0.5;
+  if (leftToRight) {
+    context.moveTo(x, y);
+    context.lineTo(x + width, y + height);
+  } else {
+    context.moveTo(x + width, y);
+    context.lineTo(x, y + height);
   }
 }
-const genCanvas = (canvasElement) => {
-  if (canvasElement.current) {
-    const canvas = canvasElement.current as HTMLCanvasElement;
-    const context = canvas?.getContext("2d");
-    if(context) {
-      const canvaswidth = window.innerWidth;
-      const canvasheight = window.innerHeight;
-      const step = 60;
-      const dpr = window.devicePixelRatio;
-      canvas.width = canvaswidth * dpr;
-      canvas.height = canvasheight * dpr;
-      context.scale(dpr, dpr);
 
-      context.lineCap = "square";
-      context.lineWidth = 3;
-      context.globalCompositeOperation = "destination-atop";
-      context.strokeStyle = "rgba(0,0,0,0.05)";
+const genCanvas = (canvasElement: React.RefObject<HTMLCanvasElement>): void => {
+  if (!canvasElement.current) return;
+  const canvas = canvasElement.current;
+  const context = canvas.getContext("2d");
+  if (!context) return;
 
-      for (let x = 0; x < canvaswidth; x += step) {
-        for (let y = 0; y < canvasheight; y += step) {
-          draw(x, y, step, step, context);
-        }
-      }
-      context.stroke();
+  const canvasWidth = window.innerWidth;
+  const canvasHeight = window.innerHeight;
+  const dpr = window.devicePixelRatio;
+  canvas.width = canvasWidth * dpr;
+  canvas.height = canvasHeight * dpr;
+  context.scale(dpr, dpr);
+
+  context.lineCap = "square";
+  context.lineWidth = 3;
+  context.globalCompositeOperation = "destination-atop";
+  context.strokeStyle = "rgba(0,0,0,0.05)";
+
+  for (let x = 0; x < canvasWidth; x += GRID_STEP_PX) {
+    for (let y = 0; y < canvasHeight; y += GRID_STEP_PX) {
+      draw(x, y, GRID_STEP_PX, GRID_STEP_PX, context);
     }
   }
+  context.stroke();
 }
+
 const CanvasBg = () => {
-  const canvasElement = useRef(null);
+  const canvasElement = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
-    genCanvas(canvasElement)
-  },[])
-  return <canvas className="canvas-bg" ref={canvasElement} />;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+    genCanvas(canvasElement);
+    const handleResize = () => genCanvas(canvasElement);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  return <canvas className="canvas-bg" ref={canvasElement} aria-hidden="true" />;
 }
 
 export default CanvasBg;
