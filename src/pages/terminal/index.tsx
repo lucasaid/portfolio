@@ -40,13 +40,8 @@ const COMMAND_DESCRIPTIONS: Record<string, string> = {
 }
 
 const formatDate = (date: Date): string => {
-  const formattedDate = new Date(date);
-  const formattedDay = formattedDate.toLocaleString('en-US', { day: 'numeric', month: 'short' });
-  const formattedTime = formattedDate.toLocaleString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false
-  });
+  const formattedDay = date.toLocaleString('en-US', { day: 'numeric', month: 'short' });
+  const formattedTime = date.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
   return `${formattedDay} ${formattedTime}`;
 }
 
@@ -90,7 +85,7 @@ const Terminal = ({ data }: { data: TerminalData }) => {
   const [terminalOutput, setTerminalOutput] = useState<Array<string | React.ReactElement>>(INITIAL_OUTPUT);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [currentDirectory, setCurrentDirectory] = useState<string>("root");
-  const [commandHistoryPointer, setCommandHistoryPointer] = useState<number | null | undefined>(null);
+  const [commandHistoryPointer, setCommandHistoryPointer] = useState<number | null>(null);
   const [numOutputLines, setNumOutputLines] = useState<number>(10);
   const commandInputRef = useRef<HTMLInputElement>(null);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
@@ -109,6 +104,7 @@ const Terminal = ({ data }: { data: TerminalData }) => {
 
   useEffect(() => {
     playAudio('/beep.mp3');
+    commandInputRef.current?.focus();
   }, []);
 
   useEffect(() => {
@@ -118,13 +114,10 @@ const Terminal = ({ data }: { data: TerminalData }) => {
   }, [terminalOutput])
 
   useEffect(() => {
-    if (commandHistoryPointer !== undefined && commandHistoryPointer !== null && commandInputRef.current) {
-      commandInputRef.current.focus()
-      commandInputRef.current.value = commandHistory[commandHistoryPointer]
-    } else if (commandHistoryPointer === null && commandInputRef.current) {
-      commandInputRef.current.value = ""
+    if (commandInputRef.current) {
+      commandInputRef.current.value = commandHistoryPointer !== null ? commandHistory[commandHistoryPointer] : "";
     }
-  }, [commandHistoryPointer])
+  }, [commandHistoryPointer, commandHistory])
 
   useEffect(() => {
     const calculateLines = () => {
@@ -141,10 +134,6 @@ const Terminal = ({ data }: { data: TerminalData }) => {
     }
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    commandInputRef.current?.focus()
-  }, [])
 
   const printList = (rows: string[][]): void => {
     const columnWidths: number[] = rows[0].map((_, index) =>
@@ -185,10 +174,11 @@ const Terminal = ({ data }: { data: TerminalData }) => {
       const options = args[0] || '';
 
       switch (options) {
-        case '-l':
+        case '-l': {
           printList(listing);
           break;
-        case '-la':
+        }
+        case '-la': {
           const extendedListing = [
             ['drwxr-xr-x', '2', 'root', 'root', '4096', 'Jun 20 16:53', '.'],
             ['drwxr-xr-x', '8', 'root', 'root', '4096', 'Jun 20 16:53', '..'],
@@ -196,24 +186,25 @@ const Terminal = ({ data }: { data: TerminalData }) => {
           ];
           printList(extendedListing);
           break;
-        default:
-          // Group filenames into rows of FILE_COUNT_WIDTH for compact display
+        }
+        default: {
           const formattedListing = listing.reduce((acc: string[][], cur: string[], i: number) => {
-            if (i % FILE_COUNT_WIDTH === 0) {
-              acc.push([]);
-            }
+            if (i % FILE_COUNT_WIDTH === 0) acc.push([]);
             acc[acc.length - 1].push(cur[cur.length - 1]);
             return acc;
           }, []);
           printList(formattedListing);
           break;
+        }
       }
     },
     cd: (args: string[]) => {
       const targetDirectory = args[0];
 
-      if (directoryListing[targetDirectory]) {
-        setCurrentDirectory(targetDirectory || "root");
+      if (!targetDirectory || targetDirectory === "~") {
+        setCurrentDirectory("root");
+      } else if (directoryListing[targetDirectory]) {
+        setCurrentDirectory(targetDirectory);
       } else if (targetDirectory === "..") {
         setCurrentDirectory("root");
       } else {
@@ -280,21 +271,15 @@ const Terminal = ({ data }: { data: TerminalData }) => {
     if (key === "Enter") {
       const command = value.trim();
       currentTarget.value = "";
-      setCommandHistoryPointer(undefined);
+      setCommandHistoryPointer(null);
       executeCommand(command);
     } else if (key === "ArrowUp" && commandHistory.length > 0) {
-      setCommandHistoryPointer((prevPointer) =>
-        prevPointer === undefined || prevPointer === null
-          ? commandHistory.length - 1
-          : Math.max(0, prevPointer - 1)
+      setCommandHistoryPointer((prev) =>
+        prev === null ? commandHistory.length - 1 : Math.max(0, prev - 1)
       );
     } else if (key === "ArrowDown" && commandHistory.length > 0) {
-      setCommandHistoryPointer((prevPointer) =>
-        prevPointer === undefined
-          ? 0
-          : prevPointer !== null && prevPointer < commandHistory.length - 1
-          ? prevPointer + 1
-          : null
+      setCommandHistoryPointer((prev) =>
+        prev !== null && prev < commandHistory.length - 1 ? prev + 1 : null
       );
     }
   };
