@@ -135,16 +135,28 @@ const Terminal = ({ data }: { data: TerminalData }) => {
     return () => observer.disconnect();
   }, []);
 
-  const printList = (rows: string[][]): void => {
+  const getDirectoryNames = (listing: DirectoryEntry[]): Set<string> =>
+    new Set(listing.filter(e => e[0].startsWith('d')).map(e => e[e.length - 1]));
+
+  const printList = (rows: string[][], directoryNames?: Set<string>): void => {
     const columnWidths: number[] = rows[0].map((_, index) =>
       Math.max(...rows.map(row => row[index] ? row[index].length : 0))
     );
 
     rows.forEach(row => {
-      const formattedRow = row.map((value, index) =>
-        value.padEnd(columnWidths[index], " ")
-      );
-      appendOutputToTerminal(formattedRow.join('  '));
+      const hasDir = directoryNames && row.some(cell => directoryNames.has(cell.trim()));
+      if (!hasDir) {
+        appendOutputToTerminal(row.map((v, i) => v.padEnd(columnWidths[i], ' ')).join('  '));
+        return;
+      }
+      const cells = row.flatMap((value, index) => {
+        const padded = value.padEnd(columnWidths[index], ' ');
+        const sep = index < row.length - 1 ? '  ' : '';
+        return directoryNames!.has(value.trim())
+          ? [<span key={index} style={{ color: '#88aaff' }}>{padded}</span>, sep]
+          : [`${padded}${sep}`];
+      });
+      appendOutputToTerminal(<span style={{ whiteSpace: 'pre' }}>{cells}</span>);
     });
   }
 
@@ -172,10 +184,11 @@ const Terminal = ({ data }: { data: TerminalData }) => {
     ls: (args: string[]) => {
       const listing = directoryListing[currentDirectory];
       const options = args[0] || '';
+      const dirNames = getDirectoryNames(listing);
 
       switch (options) {
         case '-l': {
-          printList(listing);
+          printList(listing, dirNames);
           break;
         }
         case '-la': {
@@ -184,7 +197,7 @@ const Terminal = ({ data }: { data: TerminalData }) => {
             ['drwxr-xr-x', '8', 'root', 'root', '4096', 'Jun 20 16:53', '..'],
             ...listing
           ];
-          printList(extendedListing);
+          printList(extendedListing, new Set(['.', '..', ...dirNames]));
           break;
         }
         default: {
@@ -193,7 +206,7 @@ const Terminal = ({ data }: { data: TerminalData }) => {
             acc[acc.length - 1].push(cur[cur.length - 1]);
             return acc;
           }, []);
-          printList(formattedListing);
+          printList(formattedListing, dirNames);
           break;
         }
       }
@@ -234,6 +247,10 @@ const Terminal = ({ data }: { data: TerminalData }) => {
         const foundFile = directoryListing[currentDirectory].find((file) => file[file.length - 1] === targetFile)
 
         if (foundFile) {
+          if (foundFile[0].startsWith('d')) {
+            appendOutputToTerminal(`open: ${targetFile}: is a directory`);
+            return;
+          }
           appendOutputToTerminal(`Opening ${targetFile}...`);
           setTimeout(() => {
             navigate(`/${currentDirectory}/${targetFile.split('.')[0]}`);
@@ -268,7 +285,30 @@ const Terminal = ({ data }: { data: TerminalData }) => {
     const { key, currentTarget } = event;
     const { value } = currentTarget;
 
-    if (key === "Enter") {
+    if (key === "Tab") {
+      event.preventDefault();
+      const parts = value.split(' ');
+      const partial = parts[parts.length - 1];
+
+      if (parts.length === 1) {
+        const matches = Object.keys(EXECUTABLE_COMMANDS).filter(cmd => cmd.startsWith(partial));
+        if (matches.length === 1) {
+          currentTarget.value = matches[0];
+        } else if (matches.length > 1) {
+          appendOutputToTerminal(`${renderPrompt()} ${value}`);
+          appendOutputToTerminal(matches.join('  '));
+        }
+      } else {
+        const filenames = directoryListing[currentDirectory].map(entry => entry[entry.length - 1]);
+        const matches = filenames.filter(f => f.startsWith(partial));
+        if (matches.length === 1) {
+          currentTarget.value = [...parts.slice(0, -1), matches[0]].join(' ');
+        } else if (matches.length > 1) {
+          appendOutputToTerminal(`${renderPrompt()} ${value}`);
+          appendOutputToTerminal(matches.join('  '));
+        }
+      }
+    } else if (key === "Enter") {
       const command = value.trim();
       currentTarget.value = "";
       setCommandHistoryPointer(null);
