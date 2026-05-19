@@ -1,0 +1,345 @@
+import React, { useEffect, useMemo, useRef, useState } from "react"
+import { navigate } from "gatsby"
+import { padding, lineHeight } from "./terminal.styles"
+
+const MAX_HISTORY_LENGTH = 50
+const OUTPUT_LINE_BUFFER = 20
+const FILE_COUNT_WIDTH = 4
+const NAVIGATION_DELAY_MS = 1000
+
+export type DirectoryEntry = string[]
+export type DirectoryListing = Record<string, DirectoryEntry[]>
+
+export interface TerminalData {
+  blog: {
+    posts: Array<{
+      frontmatter: { date: string }
+      fileAbsolutePath: string
+      rawMarkdownBody: string
+      id: string
+    }>
+  }
+}
+
+export type OutputLine = { id: number; content: string | React.ReactElement }
+
+let lineId = 0
+const nextId = () => ++lineId
+const toLine = (content: string | React.ReactElement): OutputLine => ({ id: nextId(), content })
+
+const formatDate = (date: Date): string => {
+  const formattedDay = date.toLocaleString('en-US', { day: 'numeric', month: 'short' })
+  const formattedTime = date.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+  return `${formattedDay} ${formattedTime}`
+}
+
+const BASE_LISTING: DirectoryListing = {
+  "root": [
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "package.json"],
+    ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "public"],
+    ["drwxr-xr-x", "4", "root", "root", "4096", "Jun 20 16:53", "now"],
+  ],
+  "now": [
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
+  ],
+  "blog": [
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "index.html"],
+    ["-rwxrwxr-x", "1", "root", "root", "4096", "Jun 20 16:53", "README.md"],
+  ],
+}
+
+const COMMAND_DESCRIPTIONS: Record<string, string> = {
+  cat: "Displays the contents of a file",
+  cd: "Changes the current directory",
+  clear: "Clears the terminal output",
+  exit: "Exits the terminal",
+  help: "Displays this help message",
+  ls: "Lists files in the current directory",
+  mkdir: "Create a directory",
+  open: "Opens a file",
+  ssh: "Connect to remote host",
+  sudo: "Executes a command as root",
+  touch: "Create a file",
+}
+
+const getInitialOutput = (): OutputLine[] => [
+  "Welcome to Chris OS!",
+  "Type 'help' for a list of commands",
+  "",
+  "Example:",
+  "ls",
+  "cd now",
+  "open",
+  "",
+  `Today is ${new Date().toDateString()}`,
+  "",
+].map(toLine)
+
+const playAudio = (src: string): void => {
+  const audio = new Audio(src)
+  audio.play()
+}
+
+export function useTerminal(data: TerminalData) {
+  const [terminalOutput, setTerminalOutput] = useState<OutputLine[]>(getInitialOutput)
+  const [commandHistory, setCommandHistory] = useState<string[]>([])
+  const [currentDirectory, setCurrentDirectory] = useState<string>("root")
+  const [commandHistoryPointer, setCommandHistoryPointer] = useState<number | null>(null)
+  const [numOutputLines, setNumOutputLines] = useState<number>(10)
+
+  const commandInputRef = useRef<HTMLInputElement>(null)
+  const terminalContainerRef = useRef<HTMLDivElement>(null)
+  const outputContainerRef = useRef<HTMLDivElement>(null)
+
+  const directoryListing: DirectoryListing = useMemo(() => {
+    const blogEntries: DirectoryEntry[] = data.blog.posts.map((post) => {
+      const fileName = post.fileAbsolutePath.split("/").pop() ?? ""
+      return ["-rwxrwxr-x", "1", "root", "root", "4096", formatDate(new Date(post.frontmatter.date)), fileName]
+    })
+    return { ...BASE_LISTING, blog: [...BASE_LISTING.blog, ...blogEntries] }
+  }, [data.blog.posts])
+
+  const FILE_CONTENTS: Record<string, Record<string, string>> = useMemo(() => {
+    const blogContents: Record<string, string> = {}
+    data.blog.posts.forEach((post) => {
+      const fileName = post.fileAbsolutePath.split("/").pop() ?? ""
+      blogContents[fileName] = post.rawMarkdownBody
+    })
+    return {
+      root: {
+        "README.md": "# chris-os\n\nPersonal portfolio site. Built with Gatsby, TypeScript, and too much free time.\n\nSee /now for what I'm currently up to.",
+        "index.html": "<!DOCTYPE html>\n<html>\n  <head><title>Chris Lucas</title></head>\n  <body><!-- built by gatsby, don't edit this --></body>\n</html>",
+        "package.json": '{\n  "name": "portfolio",\n  "version": "1.0.0",\n  "private": true,\n  "dependencies": {\n    "gatsby": "^5.0.0",\n    "react": "^18.0.0",\n    "typescript": "^5.0.0"\n  }\n}',
+      },
+      now: {
+        "index.html": "<!-- This page is generated from src/pages/now/index.tsx -->\n<!-- Edit that file to update the Now page. -->",
+        "README.md": "# /now\n\nWhat I'm currently up to. Updated irregularly.\nInspired by nownownow.com",
+      },
+      blog: {
+        "index.html": "<!-- Blog index — generated by Gatsby from src/blog/*.md -->",
+        "README.md": "# /blog\n\nPosts are written in Markdown and live in src/blog/.\nGatsby builds a page for each one at /blog/<slug>.",
+        ...blogContents,
+      },
+      work: {
+        "index.html": "<!-- Work index — generated by Gatsby from src/work/*.md -->",
+      },
+    }
+  }, [data.blog.posts])
+
+  useEffect(() => {
+    playAudio('/beep.mp3')
+    commandInputRef.current?.focus()
+  }, [])
+
+  useEffect(() => {
+    if (outputContainerRef.current) {
+      outputContainerRef.current.scrollTop = outputContainerRef.current.scrollHeight
+    }
+  }, [terminalOutput])
+
+  useEffect(() => {
+    if (commandInputRef.current) {
+      commandInputRef.current.value = commandHistoryPointer !== null ? commandHistory[commandHistoryPointer] : ""
+    }
+  }, [commandHistoryPointer, commandHistory])
+
+  useEffect(() => {
+    const calculateLines = () => {
+      const terminalHeight = terminalContainerRef.current?.clientHeight ?? 0
+      const calculatedLines = Math.floor((terminalHeight - (padding * 2)) / lineHeight) + OUTPUT_LINE_BUFFER
+      setNumOutputLines(calculatedLines)
+    }
+
+    calculateLines()
+
+    const observer = new ResizeObserver(calculateLines)
+    if (terminalContainerRef.current) {
+      observer.observe(terminalContainerRef.current)
+    }
+    return () => observer.disconnect()
+  }, [])
+
+  const prompt = (): string => {
+    const directoryPath = currentDirectory && currentDirectory !== "root" ? `/${currentDirectory}` : ""
+    return `guest@chris-os:~${directoryPath}$`
+  }
+
+  const getDirectoryNames = (listing: DirectoryEntry[]): Set<string> =>
+    new Set(listing.filter(e => e[0].startsWith('d')).map(e => e[e.length - 1]))
+
+  const appendOutput = (newOutput: string | string[] | React.ReactElement) => {
+    setTerminalOutput((prev) => {
+      const newLines = Array.isArray(newOutput) ? newOutput.map(toLine) : [toLine(newOutput)]
+      return [...prev, ...newLines].slice(-numOutputLines)
+    })
+  }
+
+  const printList = (rows: string[][], directoryNames?: Set<string>): void => {
+    const columnWidths: number[] = rows[0].map((_, index) =>
+      Math.max(...rows.map(row => row[index] ? row[index].length : 0))
+    )
+    rows.forEach(row => {
+      const hasDir = directoryNames && row.some(cell => directoryNames.has(cell.trim()))
+      if (!hasDir) {
+        appendOutput(row.map((v, i) => v.padEnd(columnWidths[i], ' ')).join('  '))
+        return
+      }
+      const cells = row.flatMap((value, index) => {
+        const padded = value.padEnd(columnWidths[index], ' ')
+        const sep = index < row.length - 1 ? ' ' : ''
+        return directoryNames!.has(value.trim())
+          ? [React.createElement('span', { key: index, style: { color: '#88aaff' } }, padded), sep]
+          : [`${padded}${sep}`]
+      })
+      appendOutput(React.createElement('span', { style: { whiteSpace: 'pre' } }, ...cells))
+    })
+  }
+
+  const accessDenied = () => {
+    playAudio('/dennis.mp3')
+    appendOutput("")
+    appendOutput(React.createElement('img', { src: '/dennis.gif', alt: 'Access denied', width: 400, height: 300 }))
+    appendOutput("")
+  }
+
+  const COMMANDS: Record<string, (args: string[]) => void> = {
+    clear: () => setTerminalOutput([]),
+    ls: (args) => {
+      const listing = directoryListing[currentDirectory]
+      const options = args[0] || ''
+      const dirNames = getDirectoryNames(listing)
+      switch (options) {
+        case '-l':
+          printList(listing, dirNames)
+          break
+        case '-la':
+          printList(
+            [['drwxr-xr-x', '2', 'root', 'root', '4096', 'Jun 20 16:53', '.'], ['drwxr-xr-x', '8', 'root', 'root', '4096', 'Jun 20 16:53', '..'], ...listing],
+            new Set(['.', '..', ...dirNames])
+          )
+          break
+        default: {
+          const grid = listing.reduce((acc: string[][], cur, i) => {
+            if (i % FILE_COUNT_WIDTH === 0) acc.push([])
+            acc[acc.length - 1].push(cur[cur.length - 1])
+            return acc
+          }, [])
+          printList(grid, dirNames)
+        }
+      }
+    },
+    cd: (args) => {
+      const target = args[0]
+      if (!target || target === "~" || target === "..") {
+        setCurrentDirectory("root")
+      } else if (directoryListing[target]) {
+        setCurrentDirectory(target)
+      } else {
+        appendOutput(`cd: no such file or directory: ${target}`)
+      }
+    },
+    sudo: accessDenied,
+    ssh: accessDenied,
+    mkdir: (args) => appendOutput(`mkdir: cannot create directory '${args[0]}': Permission denied`),
+    touch: (args) => appendOutput(`touch: cannot touch '${args[0]}': Permission denied`),
+    open: (args) => {
+      const targetFile = args[0]
+      playAudio('/floppy_disk.mp3')
+      if (targetFile === "index.html" || !targetFile) {
+        appendOutput("Opening index.html...")
+        const destination = currentDirectory === "root" ? "" : currentDirectory
+        setTimeout(() => navigate(`/${destination}`), NAVIGATION_DELAY_MS)
+      } else {
+        const foundFile = directoryListing[currentDirectory].find(f => f[f.length - 1] === targetFile)
+        if (foundFile) {
+          if (foundFile[0].startsWith('d')) {
+            appendOutput(`open: ${targetFile}: is a directory`)
+            return
+          }
+          appendOutput(`Opening ${targetFile}...`)
+          setTimeout(() => navigate(`/${currentDirectory}/${targetFile.split('.')[0]}`), NAVIGATION_DELAY_MS)
+        } else {
+          appendOutput(`Opening ${targetFile}...`)
+          setTimeout(() => appendOutput(`open: no such file or directory: ${targetFile}`), NAVIGATION_DELAY_MS)
+        }
+      }
+    },
+    help: () => appendOutput(['', ...Object.entries(COMMAND_DESCRIPTIONS).map(([cmd, desc]) => `${cmd}: ${desc}`), '']),
+    exit: () => {
+      playAudio('/floppy_disk.mp3')
+      appendOutput("Exiting the terminal")
+      setTimeout(() => navigate('/'), NAVIGATION_DELAY_MS)
+    },
+    cat: (args) => {
+      const [fileName] = args
+      if (!fileName) { appendOutput("cat: missing operand"); return }
+      const entry = directoryListing[currentDirectory]?.find(e => e[e.length - 1] === fileName)
+      if (!entry) { appendOutput(`cat: ${fileName}: No such file or directory`); return }
+      if (entry[0].startsWith('d')) { appendOutput(`cat: ${fileName}: Is a directory`); return }
+      const contents = FILE_CONTENTS[currentDirectory]?.[fileName]
+      appendOutput(contents ? contents.split("\n") : `cat: ${fileName}: Permission denied`)
+    },
+  }
+
+  const executeCommand = (command: string) => {
+    if (command !== '') {
+      setCommandHistory((prev) => {
+        const trimmed = prev.length > MAX_HISTORY_LENGTH ? prev.slice(1) : prev
+        return [...trimmed, command]
+      })
+    }
+
+    const [name, ...args] = command.split(' ')
+
+    if (COMMANDS[name]) {
+      appendOutput(`${prompt()} ${command}`)
+      COMMANDS[name](args)
+    } else if (command === '') {
+      appendOutput('')
+    } else {
+      appendOutput(`Unknown command: ${command}`)
+    }
+  }
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    const { key, currentTarget } = event
+    const { value } = currentTarget
+
+    if (key === "Tab") {
+      event.preventDefault()
+      const parts = value.split(' ')
+      const partial = parts[parts.length - 1]
+      if (parts.length === 1) {
+        const matches = Object.keys(COMMANDS).filter(cmd => cmd.startsWith(partial))
+        if (matches.length === 1) currentTarget.value = matches[0]
+        else if (matches.length > 1) { appendOutput(`${prompt()} ${value}`); appendOutput(matches.join('  ')) }
+      } else {
+        const filenames = directoryListing[currentDirectory].map(e => e[e.length - 1])
+        const matches = filenames.filter(f => f.startsWith(partial))
+        if (matches.length === 1) currentTarget.value = [...parts.slice(0, -1), matches[0]].join(' ')
+        else if (matches.length > 1) { appendOutput(`${prompt()} ${value}`); appendOutput(matches.join('  ')) }
+      }
+    } else if (key === "Enter") {
+      const command = value.trim()
+      currentTarget.value = ""
+      setCommandHistoryPointer(null)
+      executeCommand(command)
+    } else if (key === "ArrowUp" && commandHistory.length > 0) {
+      setCommandHistoryPointer(prev => prev === null ? commandHistory.length - 1 : Math.max(0, prev - 1))
+    } else if (key === "ArrowDown" && commandHistory.length > 0) {
+      setCommandHistoryPointer(prev => prev !== null && prev < commandHistory.length - 1 ? prev + 1 : null)
+    }
+  }
+
+  return {
+    terminalOutput,
+    prompt: prompt(),
+    handleKeyDown,
+    commandInputRef,
+    terminalContainerRef,
+    outputContainerRef,
+  }
+}
