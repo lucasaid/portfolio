@@ -1,7 +1,12 @@
 import React from "react";
 import ReactHelmet from "react-helmet";
 
-const Helmet = (props) => {
+interface HelmetProps {
+  title?: string;
+  description?: string;
+}
+
+const Helmet = (props: HelmetProps) => {
   return (
       <ReactHelmet>
         <html lang="en" />

@@ -94,7 +94,7 @@ const IndexPage = (props: Props) => {
           </a>
         </section>
         <section className="terminal">
-          <Link to='/terminal'><pre>
+          <Link to='/terminal' aria-label="Open terminal"><pre>
             <code>
             {`  .---------.
   |.-------.|

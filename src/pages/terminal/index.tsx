@@ -64,7 +64,7 @@ const BASE_LISTING: DirectoryListing = {
   ]
 }
 
-const INITIAL_OUTPUT = [
+const getInitialOutput = () => [
   "Welcome to Chris OS!",
   "Type 'help' for a list of commands",
   "",
@@ -83,7 +83,7 @@ const playAudio = (src: string): void => {
 }
 
 const Terminal = ({ data }: { data: TerminalData }) => {
-  const [terminalOutput, setTerminalOutput] = useState<Array<string | React.ReactElement>>(INITIAL_OUTPUT);
+  const [terminalOutput, setTerminalOutput] = useState<Array<string | React.ReactElement>>(getInitialOutput);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [currentDirectory, setCurrentDirectory] = useState<string>("root");
   const [commandHistoryPointer, setCommandHistoryPointer] = useState<number | null>(null);
