@@ -9,3 +9,13 @@ $white: #fff;
 
 $primary: $red;
 $primary-invert: $white;
+
+// Design tokens
+:root {
+  --color-bg: #1B2F33;
+  --color-text: #C0C5C1;
+  --color-accent: #BBBE64;
+  --color-muted: #a0a8a2;
+  --color-border: #2a4a50;
+  --color-heading: #e8ece9;
+}

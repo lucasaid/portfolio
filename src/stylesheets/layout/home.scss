@@ -1,10 +1,10 @@
 @import "~bulma";
 
 html {
-  background-color: #1B2F33;
+  background-color: var(--color-bg);
 }
 body {
-  color: #C0C5C1;
+  color: var(--color-text);
   font-family: $courier;
   // background-image: url(bg.png);
   // background-size:contain;
@@ -40,7 +40,7 @@ h2 {
   }
 } 
 a {
-  color: #BBBE64;
+  color: var(--color-accent);
 }
 .profile {
   border-radius: 50%;
