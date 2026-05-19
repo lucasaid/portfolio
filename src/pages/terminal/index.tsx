@@ -64,7 +64,13 @@ const BASE_LISTING: DirectoryListing = {
   ]
 }
 
-const getInitialOutput = () => [
+type OutputLine = { id: number; content: string | React.ReactElement }
+
+let lineId = 0
+const nextId = () => ++lineId
+const toLine = (content: string | React.ReactElement): OutputLine => ({ id: nextId(), content })
+
+const getInitialOutput = (): OutputLine[] => [
   "Welcome to Chris OS!",
   "Type 'help' for a list of commands",
   "",
@@ -75,7 +81,7 @@ const getInitialOutput = () => [
   "",
   `Today is ${new Date().toDateString()}`,
   "",
-]
+].map(toLine)
 
 const playAudio = (src: string): void => {
   const audio = new Audio(src);
@@ -83,7 +89,7 @@ const playAudio = (src: string): void => {
 }
 
 const Terminal = ({ data }: { data: TerminalData }) => {
-  const [terminalOutput, setTerminalOutput] = useState<Array<string | React.ReactElement>>(getInitialOutput);
+  const [terminalOutput, setTerminalOutput] = useState<OutputLine[]>(getInitialOutput);
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
   const [currentDirectory, setCurrentDirectory] = useState<string>("root");
   const [commandHistoryPointer, setCommandHistoryPointer] = useState<number | null>(null);
@@ -197,11 +203,10 @@ const Terminal = ({ data }: { data: TerminalData }) => {
 
   const appendOutputToTerminal = (newOutput: string | string[] | React.ReactElement) => {
     setTerminalOutput((previousOutput) => {
-      const updatedOutput = Array.isArray(newOutput)
-        ? [...previousOutput, ...newOutput]
-        : [...previousOutput, newOutput];
-
-      return updatedOutput.slice(-numOutputLines);
+      const newLines = Array.isArray(newOutput)
+        ? newOutput.map(toLine)
+        : [toLine(newOutput)];
+      return [...previousOutput, ...newLines].slice(-numOutputLines);
     });
   }
 
@@ -394,8 +399,8 @@ const Terminal = ({ data }: { data: TerminalData }) => {
   };
 
   const renderOutput = () => {
-    return terminalOutput.map((outputLine, index) => (
-      <div key={index}>{outputLine}</div>
+    return terminalOutput.map((line) => (
+      <div key={line.id}>{line.content}</div>
     ));
   }
 

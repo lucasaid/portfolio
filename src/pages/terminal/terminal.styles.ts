@@ -6,20 +6,20 @@ export const lineHeight = 27
 
 export const TerminalWrapper = styled.div`
   height: 100%;
-  color: #fff;
+  color: var(--color-heading);
   font-family: monospace;
   padding: ${padding}px;
   border-radius: 5px;
   overflow: hidden;
 `
 export const Prompt = styled.div`
-  color: #fff;
+  color: var(--color-heading);
   margin-right: 5px;
   white-space: nowrap;
 `
 export const Command = styled.input`
   background-color: transparent;
-  color: #fff;
+  color: var(--color-heading);
   border: none;
   outline: none;
   font-family: inherit;
