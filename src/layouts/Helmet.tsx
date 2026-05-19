@@ -11,6 +11,9 @@ const Helmet = (props: HelmetProps) => {
       <ReactHelmet>
         <html lang="en" />
         <meta charSet="utf-8" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Roboto+Condensed:wght@400;700&display=swap" />
         <meta
           name="description"
           content={props.description || "Chris Lucas - Frontend Web Developer. Melbourne, Australia"}

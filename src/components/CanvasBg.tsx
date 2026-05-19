@@ -45,9 +45,16 @@ const CanvasBg = () => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
     genCanvas(canvasElement);
-    const handleResize = () => genCanvas(canvasElement);
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    const handleResize = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => genCanvas(canvasElement), 120);
+    };
     window.addEventListener('resize', handleResize, { passive: true });
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(debounceTimer);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
   return <canvas className="canvas-bg" ref={canvasElement} aria-hidden="true" />;
 }
