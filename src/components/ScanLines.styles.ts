@@ -7,6 +7,7 @@ const scanline = keyframes`
 `
 export const ScanLines = styled.div`
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   position: relative;
   &:before,

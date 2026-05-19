@@ -81,6 +81,13 @@ a {
   max-width: 550px;
   width: 100%;
 }
+.link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+}
 .link_text {
   display: inline-block;
   text-indent: -10000px;
