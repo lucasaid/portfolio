@@ -35,41 +35,29 @@ exports.onCreateNode = ({ node, getNode, actions }) => {
 exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions
 
-  const blogResult = await graphql(`
-    query {
-      allMarkdownRemark(filter: { fileAbsolutePath: { regex: "/src/blog/" } }) {
-        edges {
-          node {
-            fields { slug }
-          }
-        }
-      }
-    }
-  `)
-  blogResult.data.allMarkdownRemark.edges.forEach(({ node }) => {
-    createPage({
-      path: node.fields.slug,
-      component: path.resolve(`./src/templates/BlogPost.tsx`),
-      context: { slug: node.fields.slug },
-    })
-  })
+  const sources = [
+    { dir: `/src/blog/`, template: `BlogPost` },
+    { dir: `/src/work/`, template: `WorkDetail` },
+  ]
 
-  const workResult = await graphql(`
-    query {
-      allMarkdownRemark(filter: { fileAbsolutePath: { regex: "/src/work/" } }) {
-        edges {
-          node {
-            fields { slug }
+  for (const { dir, template } of sources) {
+    const result = await graphql(`
+      query {
+        allMarkdownRemark(filter: { fileAbsolutePath: { regex: "${dir}" } }) {
+          edges {
+            node {
+              fields { slug }
+            }
           }
         }
       }
-    }
-  `)
-  workResult.data.allMarkdownRemark.edges.forEach(({ node }) => {
-    createPage({
-      path: node.fields.slug,
-      component: path.resolve(`./src/templates/WorkDetail.tsx`),
-      context: { slug: node.fields.slug },
+    `)
+    result.data.allMarkdownRemark.edges.forEach(({ node }) => {
+      createPage({
+        path: node.fields.slug,
+        component: path.resolve(`./src/templates/${template}.tsx`),
+        context: { slug: node.fields.slug },
+      })
     })
-  })
+  }
 }
