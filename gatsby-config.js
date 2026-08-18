@@ -3,6 +3,15 @@ module.exports = {
     title: "Chris Creates"
   },
   plugins: [
+    {
+      // src/pages/** is scanned for pages; colocated hooks and styled-components
+      // have no default export, so page-creator errors on them.
+      resolve: "gatsby-plugin-page-creator",
+      options: {
+        path: `${__dirname}/src/pages`,
+        ignore: ["**/*.styles.ts", "**/use*.ts"],
+      },
+    },
     "gatsby-plugin-react-helmet",
     "gatsby-plugin-sass",
     {

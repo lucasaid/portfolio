@@ -1,9 +1,0 @@
-{
-  "plugins": ["stylelint-scss", "stylelint-order"],
-  "extends": "stylelint-config-recommended",
-  "rules": {
-    "order/properties-alphabetical-order": true,
-    "at-rule-no-unknown": null,
-    "scss/at-rule-no-unknown": true
-  }
-}
