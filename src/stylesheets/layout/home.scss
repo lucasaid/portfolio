@@ -26,7 +26,7 @@ h1 {
   font-size: 11vw;
   font-weight: bold;
   letter-spacing: 0.1vw;
-  @include respond-to(fablet) {
+  @media only screen and (min-width: 35.75em) {
     font-size: 2.618rem;
     letter-spacing: 2px;
   }
@@ -35,7 +35,7 @@ h2 {
   font-family: $courier;
   font-size: 7vw;
   font-weight: bold;
-  @include respond-to(fablet) {
+  @media only screen and (min-width: 35.75em) {
     font-size: 1.618rem;
   }
 } 
