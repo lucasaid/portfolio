@@ -4,9 +4,6 @@
   "version": "1.2",
   "author": "Chris Lucas",
   "dependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
-    "@types/react-helmet": "^6.1.11",
     "bulma": "^1.0.2",
     "gatsby": "^5.13.7",
     "gatsby-image": "^3.11.0",
@@ -24,8 +21,7 @@
     "react-dom": "^18.3.1",
     "react-helmet": "^6.1.0",
     "sass": "^1.77.8",
-    "styled-components": "^6.1.12",
-    "typescript": "^5.5.4"
+    "styled-components": "^6.1.12"
   },
   "keywords": [
     "gatsby"
@@ -42,8 +38,12 @@
     "commit": "git-cz"
   },
   "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@types/react-helmet": "^6.1.11",
     "commitizen": "^4.3.0",
     "cz-conventional-changelog": "^3.3.0",
-    "prettier": "^3.3.3"
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
   }
 }
