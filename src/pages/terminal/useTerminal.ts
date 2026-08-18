@@ -24,8 +24,7 @@ export interface TerminalData {
 export type OutputLine = { id: number; content: string | React.ReactElement }
 
 let lineId = 0
-const nextId = () => ++lineId
-const toLine = (content: string | React.ReactElement): OutputLine => ({ id: nextId(), content })
+const toLine = (content: string | React.ReactElement): OutputLine => ({ id: ++lineId, content })
 
 const formatDate = (date: Date): string => {
   const formattedDay = date.toLocaleString('en-US', { day: 'numeric', month: 'short' })
@@ -286,10 +285,7 @@ export function useTerminal(data: TerminalData) {
 
   const executeCommand = (command: string) => {
     if (command !== '') {
-      setCommandHistory((prev) => {
-        const trimmed = prev.length > MAX_HISTORY_LENGTH ? prev.slice(1) : prev
-        return [...trimmed, command]
-      })
+      setCommandHistory((prev) => [...prev, command].slice(-MAX_HISTORY_LENGTH))
     }
 
     const [name, ...args] = command.split(' ')
