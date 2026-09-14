@@ -57,9 +57,9 @@ const IndexPage = (props: Props) => {
           </div>
         </header>
         <section className="description">
-          <h2>Lead Front End Developer</h2>
+          <h2>Lead Front End Engineer</h2>
           <br />
-          Currently @ Animo Studios
+          Currently @ <a href="https://animo.net/" target="blank" rel="noopener noreferrer">Animo Studios</a>
           <br />
           <br />
           Coder
