@@ -1,0 +1,62 @@
+---
+import { Image } from "astro:assets";
+import Main from "../layouts/Main.astro";
+import lumberg from "../img/lumberg.png";
+
+interface Props {
+  title: string;
+  backTo?: string;
+  updated?: string;
+  image?: boolean;
+}
+
+const { title, backTo = "/now", updated, image = false } = Astro.props;
+---
+
+<Main>
+  <div class="now">
+    <h1 class="heading">{title}</h1>
+    <div>
+      Inspired by <a href="https://sive.rs/" target="_blank" rel="noopener noreferrer">Derek Sivers</a> concept of{" "}
+      <a href="https://nownownow.com/about" target="_blank" rel="noopener noreferrer">/now</a> pages
+    </div>
+    {updated && <div>Last Updated {updated}</div>}
+    <div class="content">
+      <a href={backTo}>&lt;&lt; Back</a>
+      <br />
+      <br />
+      <slot />
+      <br />
+      <a href={backTo}>&lt;&lt; Back</a>
+    </div>
+    {image && <Image class="lumberg" src={lumberg} alt="Bill Lumberg" />}
+  </div>
+</Main>
+
+<style>
+  .heading {
+    margin-bottom: 20px;
+  }
+  .lumberg {
+    width: 30vh;
+    height: auto;
+    position: fixed;
+    bottom: 0;
+  }
+  .now {
+    display: flex;
+    padding: 20px;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    height: 100vh;
+    position: relative;
+    max-width: 800px;
+    margin: auto;
+  }
+  .content {
+    text-align: left;
+    width: 100%;
+    padding-bottom: 200px;
+  }
+</style>
