@@ -21,11 +21,14 @@
     "build": "astro build",
     "develop": "astro dev",
     "serve": "astro preview",
+    "typecheck": "astro check",
     "format": "prettier --trailing-comma es5 --no-semi --single-quote --write \"src/**/*.{ts,tsx,astro}\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "commit": "git-cz"
   },
   "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@emnapi/runtime": "^1.7.1",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "commitizen": "^4.3.0",

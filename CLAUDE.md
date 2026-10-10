@@ -13,6 +13,9 @@ yarn build
 
 # Serve production build locally
 yarn serve
+
+# Type-check .astro, .ts and .tsx files
+yarn typecheck
 ```
 
 There are no tests (`npm test` exits with an error by design). Requires Node 22.12+ (see `.nvmrc`).

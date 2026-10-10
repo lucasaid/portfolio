@@ -9,7 +9,10 @@ const blog = defineCollection({
   schema: z.object({
     title: z.string(),
     author: z.string(),
-    date: z.coerce.date(),
+    // Must be a full YAML timestamp with offset, e.g. 2024-08-12T13:00:00+10:00.
+    // Offset-less "2024-08-12 13:00" stays a string and is rejected, rather than
+    // being parsed in whatever timezone the build machine happens to be in.
+    date: z.date(),
   }),
 });
 

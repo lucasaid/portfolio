@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Main from "../../layouts/Main.astro";
+import { formatDate } from "../../lib/formatDate";
 
 const EXCERPT_LENGTH = 140;
 
@@ -25,7 +26,7 @@ const posts = (await getCollection("blog")).sort((a, b) => b.data.date.valueOf()
             <h3 class="blog-title">{post.data.title}</h3>
           </a>
           <span class="blog-date">
-            {post.data.author}, {post.data.date.toLocaleDateString("en-AU", { dateStyle: "long" })}
+            {post.data.author}, {formatDate(post.data.date)}
           </span>
           <p>{excerpt(post.body)}</p>
         </article>

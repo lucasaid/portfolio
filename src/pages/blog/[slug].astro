@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import Main from "../../layouts/Main.astro";
+import { formatDate } from "../../lib/formatDate";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
@@ -14,7 +15,7 @@ const { Content } = await render(post);
 <Main title={`${post.data.title} — Chris Lucas`}>
   <div class="container">
     <h1>{post.data.title}</h1>
-    <small>{post.data.date.toLocaleDateString("en-AU", { dateStyle: "long" })}</small>
+    <small>{formatDate(post.data.date)}</small>
     <div><Content /></div>
   </div>
 </Main>

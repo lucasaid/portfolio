@@ -1,4 +1,3 @@
-import React from "react"
 import styles from "./Terminal.module.css"
 import { useTerminal, type TerminalPost } from "./useTerminal"
 
