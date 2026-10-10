@@ -69,8 +69,6 @@ const getInitialOutput = (): OutputLine[] => [
   "cd now",
   "open",
   "",
-  `Today is ${new Date().toDateString()}`,
-  "",
 ].map(toLine)
 
 const playAudio = (src: string): void => {
@@ -123,6 +121,9 @@ export function useTerminal(posts: TerminalPost[]) {
   }, [posts])
 
   useEffect(() => {
+    // Added after mount: the server render happens at build time, so a date in
+    // the initial output would mismatch on hydration
+    setTerminalOutput((prev) => [...prev, toLine(`Today is ${new Date().toDateString()}`), toLine("")])
     playAudio('/beep.mp3')
     commandInputRef.current?.focus()
   }, [])

@@ -29,7 +29,7 @@ const { title, backTo = "/now", updated, image = false } = Astro.props;
       <br />
       <a href={backTo}>&lt;&lt; Back</a>
     </div>
-    {image && <Image class="lumberg" src={lumberg} alt="Bill Lumberg" />}
+    {image && <Image class="lumberg" src={lumberg} alt="Bill Lumberg" widths={[285, 450, 570]} sizes="30vh" />}
   </div>
 </Main>
 

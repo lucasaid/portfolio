@@ -1,6 +1,7 @@
 ---
 import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
+import "../stylesheets/terminal.scss";
 import Terminal from "../components/terminal/Terminal";
 
 const posts = (await getCollection("blog")).map((post) => ({
@@ -12,5 +13,5 @@ const posts = (await getCollection("blog")).map((post) => ({
 
 <Base title="Terminal - Chris OS">
   <noscript>Your browser does not support JavaScript!</noscript>
-  <Terminal client:only="react" posts={posts} />
+  <Terminal client:load posts={posts} />
 </Base>

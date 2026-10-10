@@ -1,0 +1,6 @@
+// The terminal page skips Bulma; this is the slice of it (and home.scss) it relies on
+@import "base/variables";
+
+*, *::before, *::after { box-sizing: border-box; }
+html { background-color: var(--color-bg); }
+body { margin: 0; font-size: 18px; font-weight: bold; line-height: 1.5; }
