@@ -1,0 +1,63 @@
+---
+import { getCollection } from "astro:content";
+import Main from "../../layouts/Main.astro";
+import { formatDate } from "../../lib/formatDate";
+
+const EXCERPT_LENGTH = 140;
+
+// Rough plain-text excerpt like Gatsby's: strip markdown syntax, collapse whitespace
+const excerpt = (body = "") => {
+  const text = body.replace(/\]\([^)]*\)|[#*_`>\[\]]/g, "").replace(/\s+/g, " ").trim();
+  return text.length > EXCERPT_LENGTH ? `${text.slice(0, EXCERPT_LENGTH).trimEnd()}…` : text;
+};
+
+const posts = (await getCollection("blog")).sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+
+<Main title="Monkey Thoughts — Chris Lucas">
+  <div class="blog">
+    <header class="header">
+      <h1>Monkey Thoughts</h1>
+    </header>
+    <ul class="blog-list">
+      {posts.map((post) => (
+        <article class="post">
+          <a href={`/blog/${post.id}`}>
+            <h3 class="blog-title">{post.data.title}</h3>
+          </a>
+          <span class="blog-date">
+            {post.data.author}, {formatDate(post.data.date)}
+          </span>
+          <p>{excerpt(post.body)}</p>
+        </article>
+      ))}
+    </ul>
+  </div>
+</Main>
+
+<style>
+  .blog {
+    display: flex;
+    flex-direction: column;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .blog-list {
+    list-style: none;
+    padding: 0;
+  }
+  .post {
+    margin-bottom: 10px;
+  }
+  .blog-title {
+    margin-top: 0;
+  }
+  .blog-date {
+    color: #888;
+  }
+</style>

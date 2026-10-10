@@ -1,0 +1,76 @@
+/* 23px padding and 27px line height are mirrored in useTerminal.ts */
+
+@keyframes scanline {
+  0% {
+    transform: translate3d(0, 300000%, 0);
+  }
+}
+
+.scanLines {
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  position: relative;
+}
+.scanLines::before,
+.scanLines::after {
+  content: '';
+  display: block;
+  pointer-events: none;
+  position: absolute;
+}
+.scanLines::before {
+  animation: scanline 6s linear infinite;
+  background: rgba(0, 128, 0, .7);
+  height: 1px;
+  opacity: .75;
+  width: 100%;
+  z-index: 101;
+}
+.scanLines::after {
+  animation: none;
+  background: linear-gradient(to bottom, transparent 50%, rgba(0, 17, 0, .6) 51%);
+  background-size: 100% 2px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 100;
+}
+
+.wrapper {
+  height: 100%;
+  color: var(--color-heading);
+  font-family: monospace;
+  padding: 23px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.prompt {
+  color: var(--color-heading);
+  margin-right: 5px;
+  white-space: nowrap;
+}
+.command {
+  background-color: transparent;
+  color: var(--color-heading);
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: inherit;
+  width: 100%;
+}
+.output {
+  color: rgba(100, 255, 100, 1);
+  margin-top: 5px;
+  flex: 1;
+  overflow-y: hidden;
+  max-height: calc(100% - 27px);
+}
+.output div {
+  min-height: 27px;
+}
+.commandRow {
+  display: flex;
+  flex-direction: row;
+}

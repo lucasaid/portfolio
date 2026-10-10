@@ -1,7 +1,7 @@
 ---
 title: Introduction
 author: Chris
-date: 2024-08-12 13:00
+date: 2024-08-12T13:00:00+10:00
 ---
 
 ## Introduction to my ramblings
