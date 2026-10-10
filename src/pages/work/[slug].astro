@@ -1,0 +1,142 @@
+---
+import { Image } from "astro:assets";
+import { getCollection, render } from "astro:content";
+import Main from "../../layouts/Main.astro";
+import { workImage } from "../../lib/workImage";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("work");
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const fm = entry.data;
+const { Content } = await render(entry);
+const image = workImage(fm.image);
+---
+
+<Main title={`${fm.title} — Chris Lucas`}>
+  <div class="work">
+    <div class="back-link"><a href="/work">&lt;&lt; Back to work</a></div>
+    <div class="header">
+      <h1 class="title">{fm.title}</h1>
+      <div class="meta">
+        <span>{fm.year}</span>
+        {fm.role && <span>{fm.role}</span>}
+      </div>
+      <div class="tech-list">
+        {fm.tech.map((t) => <span class="tech-tag">{t}</span>)}
+      </div>
+      {fm.outcome && <div class="outcome">{fm.outcome}</div>}
+    </div>
+    {image && (
+      <div class="image-wrapper">
+        <Image src={image} alt={fm.title} />
+      </div>
+    )}
+    <div class="body"><Content /></div>
+    {(fm.links?.live || fm.links?.github) && (
+      <div class="links">
+        {fm.links.live && <a href={fm.links.live} target="_blank" rel="noopener noreferrer">↗ live site</a>}
+        {fm.links.github && <a href={fm.links.github} target="_blank" rel="noopener noreferrer">↗ github</a>}
+      </div>
+    )}
+  </div>
+</Main>
+
+<style lang="scss">
+  .work {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    font-family: 'Courier New', monospace;
+    color: var(--color-text);
+  }
+
+  .back-link {
+    margin-bottom: 32px;
+    a {
+      color: var(--color-accent);
+      font-size: 0.85rem;
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
+    }
+  }
+
+  .header {
+    margin-bottom: 24px;
+  }
+
+  .title {
+    font-size: 1.8rem;
+    color: var(--color-heading);
+    margin-bottom: 6px;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    color: var(--color-muted);
+    font-size: 0.82rem;
+    margin-bottom: 16px;
+  }
+
+  .tech-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .tech-tag {
+    border: 1px solid var(--color-accent);
+    color: var(--color-accent);
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  .outcome {
+    border-left: 2px solid var(--color-accent);
+    padding: 10px 16px;
+    margin-bottom: 24px;
+    font-size: 0.88rem;
+    color: var(--color-text);
+    background: rgba(187, 190, 100, 0.05);
+  }
+
+  .image-wrapper {
+    margin-bottom: 32px;
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    img { display: block; width: 100%; height: auto; }
+  }
+
+  // Markdown output isn't scoped, hence :global
+  .body {
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: var(--color-text);
+    margin-bottom: 32px;
+    :global(h2) { font-size: 1rem; color: var(--color-accent); margin: 24px 0 10px; }
+    :global(h3) { font-size: 0.9rem; color: var(--color-accent); margin: 18px 0 8px; }
+    :global(p) { margin-bottom: 14px; }
+    :global(ul) { padding-left: 20px; margin-bottom: 14px; }
+    :global(li) { margin-bottom: 6px; }
+  }
+
+  .links {
+    display: flex;
+    gap: 20px;
+    padding-top: 24px;
+    border-top: 1px solid var(--color-border);
+    a {
+      color: var(--color-accent);
+      font-size: 0.85rem;
+      text-decoration: none;
+      &:hover { text-decoration: underline; }
+    }
+  }
+</style>
