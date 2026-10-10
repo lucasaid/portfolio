@@ -14,7 +14,7 @@
 - Retina image
 - Update photo
 - Copyright info
-- Page transitions - https://www.gatsbyjs.org/packages/gatsby-plugin-page-transitions/
+- Page transitions
 
 ## List of work
 
@@ -50,7 +50,3 @@
 - File Curator
 - Tablify
 - Img bright
-
-## Plugins to add
-
-gatsby-remark-prismjs

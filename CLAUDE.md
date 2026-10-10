@@ -5,48 +5,45 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Start dev server (http://localhost:8000)
+# Start dev server (http://localhost:4321)
 yarn develop
 
-# Production build
+# Production build (outputs to dist/)
 yarn build
 
 # Serve production build locally
 yarn serve
 ```
 
-There are no tests (`npm test` exits with an error by design).
+There are no tests (`npm test` exits with an error by design). Requires Node 22.12+ (see `.nvmrc`).
 
 ## Architecture
 
-This is a personal portfolio site built with **Gatsby 5 + TypeScript + React 18**, deployed via Netlify.
+This is a personal portfolio site built with **Astro + TypeScript**, deployed via Netlify (`netlify.toml`: `yarn build`, publish `dist`). Pages are static `.astro` files with no client JS, except `/terminal`, which is a React island.
 
 ### Pages
 
-- `/` — Home page (`src/pages/index.tsx`) — profile, bio, external links
-- `/now` — "Now" page (`src/pages/now/index.tsx`) — what Chris is currently doing, inspired by [nownownow.com](https://nownownow.com)
-- `/terminal` — Interactive terminal emulator (`src/pages/terminal/index.tsx`) — a fake Unix shell with `ls`, `cd`, `open`, `help`, `clear`, `exit` commands; navigates between Gatsby routes
-- `/blog/*` — Blog posts sourced from Markdown files in `src/blog/`, rendered via `src/templates/BlogPost.tsx`; slugs created in `gatsby-node.js`
+- `/` — Home page (`src/pages/index.astro`) — profile, bio, external links
+- `/now` — "Now" page (`src/pages/now/index.astro`) — what Chris is currently doing, inspired by [nownownow.com](https://nownownow.com). Past entries live in dated folders (`src/pages/now/2025-06-11/index.astro`)
+- `/terminal` — Interactive terminal emulator (`src/pages/terminal.astro` → `src/components/terminal/Terminal.tsx`, `client:only="react"`) — a fake Unix shell with `ls`, `cd`, `cat`, `open`, `help`, `clear`, `exit` etc.; navigates between routes. Command logic is in `useTerminal.ts`
+- `/blog/*` — Blog posts from Markdown in `src/blog/`, rendered by `src/pages/blog/[slug].astro`; listed at `src/pages/blog/index.astro`
+- `/work/*` — Work case studies from Markdown in `src/work/`, rendered by `src/pages/work/[slug].astro`; listed (featured + archive) at `src/pages/work/index.astro`
 
 ### Layout & Styling
 
-- `src/layouts/main.tsx` — wraps every page in the `<CanvasBg>` animated canvas background and global SCSS
-- `src/layouts/Helmet.tsx` — SEO/meta tags via `react-helmet`
-- `src/stylesheets/all.scss` — global styles; imports Bulma via SCSS variables
-- Per-page styled-components files follow the pattern `*.styles.ts` (e.g., `now.styles.ts`, `terminal.styles.ts`)
-- `src/components/ScanLines.styles.ts` — styled wrapper used by the terminal page to give a CRT scanline effect
-
-### Key Components
-
-- `CanvasBg` — canvas element that draws random diagonal lines as a decorative background
-- `ScanLines` — a styled-component overlay (used only in the terminal page)
+- `src/layouts/Base.astro` — `<html>`/`<head>` (meta, fonts, favicons, manifest) and global SCSS; takes optional `title`/`description`
+- `src/layouts/Main.astro` — wraps `Base` with skip link, `<main>`, and the canvas background (inline `<script>` drawing random diagonal lines)
+- `src/stylesheets/all.scss` — global styles; imports Bulma via SCSS
+- Page-specific styles are scoped `<style>` blocks inside each `.astro` file; use `:global()` for rendered Markdown
+- The terminal uses `src/components/terminal/Terminal.module.css` (includes the CRT scanline effect)
 
 ### Data / Content
 
-- Blog posts are Markdown files in `src/blog/` — `gatsby-node.js` creates pages for them at `/blog/<slug>`
-- Images are sourced from `src/img/` via `gatsby-source-filesystem` and processed with `gatsby-image` + Sharp
-- Static assets (audio files, videos, favicons) live in `static/` and are copied as-is to `public/`
+- Content collections are defined in `src/content.config.ts` (`blog`, `work`) with zod schemas; the entry id (filename stem) is the URL slug
+- Images live in `src/img/` and are rendered with `astro:assets` `<Image>`. Work entries' `image` frontmatter is a path relative to `src/img/`, resolved by `src/lib/workImage.ts`
+- Static assets (audio, gifs, favicons, `manifest.webmanifest`) live in `public/` and are copied as-is
+- `public/sw.js` is a kill-switch that unregisters the old Gatsby service worker; delete it a few months after the Astro launch
 
 ### Updating the Now Page
 
-Edit `src/pages/now/index.tsx` directly — it is plain JSX, not sourced from Markdown. Update the "Last Updated" date string in the component.
+Edit `src/pages/now/index.astro` directly — it is plain markup passed to `src/components/NowEntry.astro`, not sourced from Markdown. Update the `updated` prop date string.
