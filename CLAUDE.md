@@ -6,23 +6,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Start dev server (http://localhost:4321)
-yarn develop
+pnpm develop
 
 # Production build (outputs to dist/)
-yarn build
+pnpm build
 
 # Serve production build locally
-yarn serve
+pnpm serve
 
 # Type-check .astro, .ts and .tsx files
-yarn typecheck
+pnpm typecheck
 ```
 
-There are no tests (`npm test` exits with an error by design). Requires Node 22.12+ (see `.nvmrc`).
+There are no tests (`pnpm test` exits with an error by design). Requires Node 24 (see `.nvmrc`) and pnpm (version pinned via `packageManager` in `package.json`).
 
 ## Architecture
 
-This is a personal portfolio site built with **Astro + TypeScript**, deployed via Netlify (`netlify.toml`: `yarn build`, publish `dist`). Pages are static `.astro` files with no client JS, except `/terminal`, which is a React island.
+This is a personal portfolio site built with **Astro + TypeScript**, deployed via Netlify (`netlify.toml`: `pnpm build`, publish `dist`). Pages are static `.astro` files with no client JS, except `/terminal`, which is a React island.
 
 ### Pages
 

@@ -13,13 +13,13 @@ Personal portfolio site built with **Astro + TypeScript**, deployed via Netlify.
 ## Development
 
 ```bash
-yarn develop   # Start dev server at http://localhost:4321
-yarn build     # Production build to dist/
-yarn serve     # Serve production build locally
-yarn typecheck # Type-check with astro check
+pnpm develop   # Start dev server at http://localhost:4321
+pnpm build     # Production build to dist/
+pnpm serve     # Serve production build locally
+pnpm typecheck # Type-check with astro check
 ```
 
-Requires Node 22.12+ and Yarn.
+Requires Node 24 (see `.nvmrc`) and pnpm.
 
 ## Stack
 
