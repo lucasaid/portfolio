@@ -4,46 +4,34 @@
   "version": "1.2",
   "author": "Chris Lucas",
   "dependencies": {
+    "@astrojs/react": "7.0.1",
+    "astro": "7.3.8",
     "bulma": "^1.0.2",
-    "gatsby": "^5.13.7",
-    "gatsby-image": "^3.11.0",
-    "gatsby-plugin-manifest": "^5.13.1",
-    "gatsby-plugin-offline": "^6.13.2",
-    "gatsby-plugin-react-helmet": "^6.13.1",
-    "gatsby-plugin-sass": "^6.13.1",
-    "gatsby-plugin-sharp": "^5.13.1",
-    "gatsby-plugin-typescript": "^5.13.1",
-    "gatsby-remark-images": "^7.13.1",
-    "gatsby-source-filesystem": "^5.13.1",
-    "gatsby-transformer-remark": "^6.13.1",
-    "gatsby-transformer-sharp": "^5.13.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-helmet": "^6.1.0",
-    "sass": "^1.77.8",
-    "styled-components": "^6.1.12"
+    "sass": "^1.77.8"
   },
   "keywords": [
-    "gatsby"
+    "astro"
   ],
   "license": "MIT",
   "main": "n/a",
   "scripts": {
-    "start": "npm run develop",
-    "build": "yarn && gatsby build",
-    "develop": "gatsby develop",
-    "serve": "gatsby serve",
-    "format": "prettier --trailing-comma es5 --no-semi --single-quote --write \"{gatsby-*.js,src/**/*.js}\"",
+    "start": "astro dev",
+    "build": "astro build",
+    "develop": "astro dev",
+    "serve": "astro preview",
+    "format": "prettier --trailing-comma es5 --no-semi --single-quote --write \"src/**/*.{ts,tsx,astro}\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "commit": "git-cz"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "@types/react-helmet": "^6.1.11",
     "commitizen": "^4.3.0",
     "cz-conventional-changelog": "^3.3.0",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4"
-  }
+  },
+  "type": "module"
 }

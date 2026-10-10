@@ -1,14 +1,10 @@
 {
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"],
   "compilerOptions": {
-    "strict": true,
-    "allowJs": true,
-    "module": "commonjs",
-    "noImplicitAny": false,
-    "noImplicitThis": false,
-    "esModuleInterop": true,
-    "jsx": "react",
-    "target": "es2020"
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "noImplicitAny": false
+  }
 }
